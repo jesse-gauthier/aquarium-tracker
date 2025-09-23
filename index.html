@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#0f172a" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0f172a" />
     <title>Aquarium Cycling Tracker</title>
     <script src="data/optimal.js"></script>
     <style>
@@ -35,6 +35,13 @@
       /* Transition for subtle feedback */
       #dataTable td {
         transition: background-color 0.4s ease;
+      }
+
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity 0.3s;
+      }
+      .fade-enter-from, .fade-leave-to {
+        opacity: 0;
       }
     </style>
   </head>
@@ -489,842 +496,6 @@
         Clear All Data
       </button>
 
-      <!-- Water Changes Section -->
-      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
-        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
-          💧 Water Changes Log
-        </h3>
-        <table
-          id="waterChangesTable"
-          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
-        >
-          <thead>
-            <tr class="bg-gray-700 text-white">
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Date
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Volume Changed
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Reason
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Impact on Cycle
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
-          >
-            <tr
-              v-for="(w,i) in waterChanges"
-              :key="w.id"
-              :class="[i % 2 === 1 ? 'bg-gray-50':'','hover:bg-slate-50']"
-            >
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ w.date }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ w.volume }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ w.reason }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ w.impact }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                <button
-                  @click="deleteWaterChange(i)"
-                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md cursor-pointer text-xs font-medium"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-gray-50 border-t-2 border-gray-300">
-              <td class="px-2 py-4">
-                <input
-                  type="date"
-                  v-model="newWaterChange.date"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newWaterChange.volume"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select volume...</option>
-                  <option value="25% (9.25 gal)">25% (9.25 gal)</option>
-                  <option value="50% (18.5 gal)">50% (18.5 gal)</option>
-                  <option value="75% (27.75 gal)">75% (27.75 gal)</option>
-                  <option value="Custom">Custom</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newWaterChange.reason"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select reason...</option>
-                  <option value="Nitrite spike >5ppm">
-                    Nitrite spike >5ppm
-                  </option>
-                  <option value="Regular maintenance">
-                    Regular maintenance
-                  </option>
-                  <option value="Ammonia too high">Ammonia too high</option>
-                  <option value="pH adjustment needed">
-                    pH adjustment needed
-                  </option>
-                  <option value="Emergency">Emergency</option>
-                  <option value="Other">Other</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newWaterChange.impact"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select impact...</option>
-                  <option value="Minimal - cycle continues">
-                    Minimal - cycle continues
-                  </option>
-                  <option value="Moderate - some bacterial loss">
-                    Moderate - some bacterial loss
-                  </option>
-                  <option value="Significant - cycle reset">
-                    Significant - cycle reset
-                  </option>
-                  <option value="Unknown">Unknown</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">-</td>
-            </tr>
-          </tbody>
-        </table>
-        <button
-          class="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
-          @click="addWaterChange"
-        >
-          Log Water Change
-        </button>
-      </div>
-
-      <!-- Tank Additions/Interventions Section -->
-      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
-        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
-          🧪 Tank Additions & Interventions
-        </h3>
-        <table
-          id="additionsTable"
-          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
-        >
-          <thead>
-            <tr class="bg-gray-700 text-white">
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Date Added
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Product/Item
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Quantity/Dosage
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Reason
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
-          >
-            <tr
-              v-for="(a,i) in additions"
-              :key="a.id"
-              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
-            >
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ a.date }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ a.product }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ a.quantity }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ a.reason }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                <button
-                  @click="deleteAddition(i)"
-                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-gray-50 border-t-2 border-gray-300">
-              <td class="px-2 py-4">
-                <input
-                  type="date"
-                  v-model="newAddition.date"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newAddition.product"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select product...</option>
-                  <option value="Bacteria dose">Bacteria dose</option>
-                  <option value="pH Down">pH Down</option>
-                  <option value="pH Up">pH Up</option>
-                  <option value="Aquarium salt">Aquarium salt</option>
-                  <option value="Water conditioner">Water conditioner</option>
-                  <option value="Live plants">Live plants</option>
-                  <option value="Decorations">Decorations</option>
-                  <option value="Filter media">Filter media</option>
-                  <option value="Activated carbon">Activated carbon</option>
-                  <option value="Bio balls">Bio balls</option>
-                  <option value="Other">Other</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <input
-                  type="text"
-                  v-model="newAddition.quantity"
-                  placeholder="e.g., 5ml, 1 dose, 3 plants"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newAddition.reason"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select reason...</option>
-                  <option value="Boost bacterial colony">
-                    Boost bacterial colony
-                  </option>
-                  <option value="pH adjustment">pH adjustment</option>
-                  <option value="Water conditioning">Water conditioning</option>
-                  <option value="Aesthetic improvement">
-                    Aesthetic improvement
-                  </option>
-                  <option value="Biological filtration">
-                    Biological filtration
-                  </option>
-                  <option value="Chemical filtration">
-                    Chemical filtration
-                  </option>
-                  <option value="Emergency intervention">
-                    Emergency intervention
-                  </option>
-                  <option value="Routine maintenance">
-                    Routine maintenance
-                  </option>
-                  <option value="Other">Other</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">-</td>
-            </tr>
-          </tbody>
-        </table>
-        <button
-          class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
-          @click="addAddition"
-        >
-          Log Addition
-        </button>
-      </div>
-
-      <!-- Environmental Factors Section -->
-      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
-        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
-          🌡️ Environmental Factors
-        </h3>
-        <table
-          id="environmentalTable"
-          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
-        >
-          <thead>
-            <tr class="bg-gray-700 text-white">
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Date
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Factor Type
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Description
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Duration/Impact
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
-          >
-            <tr
-              v-for="(e,i) in environmentalFactors"
-              :key="e.id"
-              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
-            >
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ e.date }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ e.type }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ e.description }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ e.impact }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                <button
-                  @click="deleteEnvironmental(i)"
-                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-gray-50 border-t-2 border-gray-300">
-              <td class="px-2 py-4">
-                <input
-                  type="date"
-                  v-model="newEnvironmental.date"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newEnvironmental.type"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select factor...</option>
-                  <option value="Room temperature change">
-                    Room temperature change
-                  </option>
-                  <option value="Power outage">Power outage</option>
-                  <option value="Equipment failure">Equipment failure</option>
-                  <option value="Filter maintenance">Filter maintenance</option>
-                  <option value="Filter cleaning">Filter cleaning</option>
-                  <option value="Lighting change">Lighting change</option>
-                  <option value="Substrate disturbance">
-                    Substrate disturbance
-                  </option>
-                  <option value="Air pump issue">Air pump issue</option>
-                  <option value="Other">Other</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <input
-                  type="text"
-                  v-model="newEnvironmental.description"
-                  placeholder="Detailed description..."
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newEnvironmental.impact"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select duration/impact...</option>
-                  <option value="< 1 hour - minimal">< 1 hour - minimal</option>
-                  <option value="1-4 hours - moderate">
-                    1-4 hours - moderate
-                  </option>
-                  <option value="4-12 hours - significant">
-                    4-12 hours - significant
-                  </option>
-                  <option value="12+ hours - major">12+ hours - major</option>
-                  <option value="Ongoing">Ongoing</option>
-                  <option value="Resolved">Resolved</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">-</td>
-            </tr>
-          </tbody>
-        </table>
-        <button
-          class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
-          @click="addEnvironmental"
-        >
-          Log Environmental Factor
-        </button>
-      </div>
-
-      <!-- Water Source Tracking Section -->
-      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
-        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
-          🚰 Water Source Tracking
-        </h3>
-        <table
-          id="waterSourceTable"
-          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
-        >
-          <thead>
-            <tr class="bg-gray-700 text-white">
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Date
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Water Batch/Source
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Treatment Changes
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Municipal Changes
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
-          >
-            <tr
-              v-for="(s,i) in waterSources"
-              :key="s.id"
-              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
-            >
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ s.date }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ s.batch }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ s.treatment }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ s.municipal }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                <button
-                  @click="deleteWaterSource(i)"
-                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-gray-50 border-t-2 border-gray-300">
-              <td class="px-2 py-4">
-                <input
-                  type="date"
-                  v-model="newWaterSource.date"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <input
-                  type="text"
-                  v-model="newWaterSource.batch"
-                  placeholder="e.g., Batch #1, New filter"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newWaterSource.treatment"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select treatment...</option>
-                  <option value="No changes">No changes</option>
-                  <option value="New pre-filter installed">
-                    New pre-filter installed
-                  </option>
-                  <option value="KDF media replaced">KDF media replaced</option>
-                  <option value="Different conditioner used">
-                    Different conditioner used
-                  </option>
-                  <option value="Filter maintenance">Filter maintenance</option>
-                  <option value="Other">Other</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newWaterSource.municipal"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select municipal changes...</option>
-                  <option value="No known changes">No known changes</option>
-                  <option value="Seasonal adjustment">
-                    Seasonal adjustment
-                  </option>
-                  <option value="Higher chlorine">Higher chlorine</option>
-                  <option value="pH variation">pH variation</option>
-                  <option value="Hardness change">Hardness change</option>
-                  <option value="Ottawa water report change">
-                    Ottawa water report change
-                  </option>
-                  <option value="Other">Other</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">-</td>
-            </tr>
-          </tbody>
-        </table>
-        <button
-          class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
-          @click="addWaterSource"
-        >
-          Log Water Source
-        </button>
-      </div>
-
-      <!-- Bacterial Health Indicators Section -->
-      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
-        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
-          🦠 Bacterial Health Indicators
-        </h3>
-        <table
-          id="bacterialHealthTable"
-          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
-        >
-          <thead>
-            <tr class="bg-gray-700 text-white">
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Date
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Water Clarity
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Surface Film
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Odor Notes
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Bio-film Formation
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
-          >
-            <tr
-              v-for="(b,i) in bacterialHealth"
-              :key="b.id"
-              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
-            >
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ b.date }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ b.clarity }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ b.surface }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ b.odor }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ b.biofilm }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                <button
-                  @click="deleteBacterial(i)"
-                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-gray-50 border-t-2 border-gray-300">
-              <td class="px-2 py-4">
-                <input
-                  type="date"
-                  v-model="newBacterial.date"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newBacterial.clarity"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select clarity...</option>
-                  <option value="Crystal clear">Crystal clear</option>
-                  <option value="Slightly cloudy">Slightly cloudy</option>
-                  <option value="Moderately cloudy">Moderately cloudy</option>
-                  <option value="Very cloudy">Very cloudy</option>
-                  <option value="Bacterial bloom">Bacterial bloom</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newBacterial.surface"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select surface film...</option>
-                  <option value="None">None</option>
-                  <option value="Light film">Light film</option>
-                  <option value="Moderate film">Moderate film</option>
-                  <option value="Heavy film">Heavy film</option>
-                  <option value="Oily film">Oily film</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newBacterial.odor"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select odor...</option>
-                  <option value="None/neutral">None/neutral</option>
-                  <option value="Earthy (healthy)">Earthy (healthy)</option>
-                  <option value="Fresh water smell">Fresh water smell</option>
-                  <option value="Sulfur smell">Sulfur smell</option>
-                  <option value="Rotten egg smell">Rotten egg smell</option>
-                  <option value="Other concerning odor">
-                    Other concerning odor
-                  </option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newBacterial.biofilm"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select bio-film...</option>
-                  <option value="None visible">None visible</option>
-                  <option value="Light formation">Light formation</option>
-                  <option value="Moderate formation">Moderate formation</option>
-                  <option value="Heavy formation">Heavy formation</option>
-                  <option value="On filter media">On filter media</option>
-                  <option value="On substrate">On substrate</option>
-                </select>
-              </td>
-              <td class="px-2 py-4">-</td>
-            </tr>
-          </tbody>
-        </table>
-        <button
-          class="bg-gradient-to-r from-pink-500 to-pink-600 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
-          @click="addBacterial"
-        >
-          Log Bacterial Health
-        </button>
-      </div>
-
-      <!-- Critical Cycle Events Section -->
-      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
-        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
-          ⚡ Critical Cycle Events
-        </h3>
-        <table
-          id="criticalEventsTable"
-          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
-        >
-          <thead>
-            <tr class="bg-gray-700 text-white">
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Date
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Event Type
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Reading/Value
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Significance
-              </th>
-              <th
-                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
-          >
-            <tr
-              v-for="(c,i) in criticalEvents"
-              :key="c.id"
-              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
-            >
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ c.date }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ c.eventType }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ c.reading }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                {{ c.significance }}
-              </td>
-              <td class="px-3 py-3 text-center border-b border-gray-200">
-                <button
-                  @click="deleteCritical(i)"
-                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-gray-50 border-t-2 border-gray-300">
-              <td class="px-2 py-4">
-                <input
-                  type="date"
-                  v-model="newCritical.date"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newCritical.eventType"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select event...</option>
-                  <option value="First ammonia drop detected">
-                    First ammonia drop detected
-                  </option>
-                  <option value="First nitrite appearance">
-                    First nitrite appearance
-                  </option>
-                  <option value="Peak nitrite reading">
-                    Peak nitrite reading
-                  </option>
-                  <option value="First nitrate detection">
-                    First nitrate detection
-                  </option>
-                  <option value="Cycle completion test">
-                    Cycle completion test
-                  </option>
-                  <option value="Ammonia processed in 24hrs">
-                    Ammonia processed in 24hrs
-                  </option>
-                  <option value="Nitrite spike resolved">
-                    Nitrite spike resolved
-                  </option>
-                </select>
-              </td>
-              <td class="px-2 py-4">
-                <input
-                  type="text"
-                  v-model="newCritical.reading"
-                  placeholder="e.g., 3.0 ppm, 24 hours"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-2 py-4">
-                <select
-                  v-model="newCritical.significance"
-                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Select significance...</option>
-                  <option value="Major milestone">Major milestone</option>
-                  <option value="Phase transition">Phase transition</option>
-                  <option value="Cycle progression">Cycle progression</option>
-                  <option value="Potential setback">Potential setback</option>
-                  <option value="Completion indicator">
-                    Completion indicator
-                  </option>
-                </select>
-              </td>
-              <td class="px-2 py-4">-</td>
-            </tr>
-          </tbody>
-        </table>
-        <button
-          class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
-          @click="addCritical"
-        >
-          Log Critical Event
-        </button>
-      </div>
-
       <div class="mt-10 bg-white p-6 rounded-2xl shadow-lg">
         <h3 class="text-gray-800 text-xl mb-4 font-semibold">
           Cycling Progress Notes
@@ -1408,40 +579,6 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               notes: "",
             },
             progressNotes: "",
-            // Logs
-            waterChanges: [],
-            newWaterChange: { date: "", volume: "", reason: "", impact: "" },
-            additions: [],
-            newAddition: { date: "", product: "", quantity: "", reason: "" },
-            environmentalFactors: [],
-            newEnvironmental: {
-              date: "",
-              type: "",
-              description: "",
-              impact: "",
-            },
-            waterSources: [],
-            newWaterSource: {
-              date: "",
-              batch: "",
-              treatment: "",
-              municipal: "",
-            },
-            bacterialHealth: [],
-            newBacterial: {
-              date: "",
-              clarity: "",
-              surface: "",
-              odor: "",
-              biofilm: "",
-            },
-            criticalEvents: [],
-            newCritical: {
-              date: "",
-              eventType: "",
-              reading: "",
-              significance: "",
-            },
             // LocalStorage keys (dynamic per tank)
             lsKeys: {},
             // Undo buffer
@@ -1456,9 +593,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             chart: null,
             // Predictive data
             predictions: {
-              ammonia: {},
-              nitrite: {},
-              nitrate: {},
+              ammonia: { rateDisplay: '—', daysToTargetDisplay: '—', projectedDate: null },
+              nitrite: { rateDisplay: '—', daysToTargetDisplay: '—', projectedDate: null },
+              nitrate: { rateDisplay: '—', daysToPlus10Display: '—', projectedDate: null },
             },
           };
         },
@@ -1484,42 +621,6 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           },
           progressNotes(value) {
             localStorage.setItem(this.lsKeys.notes, value);
-          },
-          waterChanges: {
-            deep: true,
-            handler() {
-              this.persistWater();
-            },
-          },
-          additions: {
-            deep: true,
-            handler() {
-              this.persistAdditions();
-            },
-          },
-          environmentalFactors: {
-            deep: true,
-            handler() {
-              this.persistEnv();
-            },
-          },
-          waterSources: {
-            deep: true,
-            handler() {
-              this.persistSource();
-            },
-          },
-          bacterialHealth: {
-            deep: true,
-            handler() {
-              this.persistBacterial();
-            },
-          },
-          criticalEvents: {
-            deep: true,
-            handler() {
-              this.persistCritical();
-            },
           },
           currentTank(newVal, oldVal) {
             if (newVal && newVal !== oldVal) {
@@ -1563,17 +664,13 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               notes: "",
             };
           },
-          // Phase logic (refined & non-HTML)
+          // Phase logic
           phaseLabel(r) {
             const a = parseFloat(r.ammonia) || 0;
             const n2 = parseFloat(r.nitrite) || 0;
             const n3 = parseFloat(r.nitrate) || 0;
-            // Refined basic rules:
-            // Phase 3: Both toxic compounds ~0 and nitrate accumulating
             if (a < 0.25 && n2 < 0.25 && n3 >= 5) return "Phase 3";
-            // Phase 2: Nitrite present meaningfully OR transitioning down while nitrate still low
             if (n2 >= 0.25 && (a > 0.25 || n3 < 5)) return "Phase 2";
-            // Default Phase 1
             return "Phase 1";
           },
           phaseClass(r) {
@@ -1609,14 +706,11 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           trendClass(param, i) {
             const d = this.trendDelta(param, i);
             if (d === null || d === 0) return "text-slate-400";
-            // For ammonia & nitrite: down good (green), up bad (red)
             if (param === "ammonia" || param === "nitrite") {
               return d < 0 ? "text-green-600" : "text-red-600";
             }
-            // For nitrate: up expected (green), down unusual (amber)
             if (param === "nitrate")
               return d > 0 ? "text-green-600" : "text-amber-600";
-            // For pH: large swings flagged red, mild change neutral
             if (param === "ph") {
               if (Math.abs(d) >= 0.3) return "text-red-600";
               return "text-slate-500";
@@ -1691,35 +785,22 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               JSON.stringify(this.readings)
             );
           },
-                  this.updateChart();
-                  this.recomputePredictions();
           persistAll() {
             this.persistReadings();
             localStorage.setItem(this.lsKeys.notes, this.progressNotes);
-            this.persistWater();
-            this.persistAdditions();
-            this.persistEnv();
-            this.persistSource();
-            this.persistBacterial();
-            this.persistCritical();
             alert("Data saved");
           },
           clearAll() {
-            if (!confirm("Clear ALL saved data?")) return;
+            if (!confirm("Clear ALL saved data for this tank?")) return;
             Object.values(this.lsKeys).forEach((k) =>
               localStorage.removeItem(k)
             );
             this.readings = [];
             this.progressNotes = "";
-            this.waterChanges = [];
-            this.additions = [];
-            this.environmentalFactors = [];
-            this.waterSources = [];
-            this.bacterialHealth = [];
-            this.criticalEvents = [];
             this.resetNewReading();
+            this.updateChart();
+            this.recomputePredictions();
           },
-                    // Seed first reading for new tank
           loadAll() {
             const get = (k) => {
               try {
@@ -1729,482 +810,301 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               }
             };
             const r = get(this.lsKeys.readings);
-            if (r) this.readings = r;
+            if (r) this.readings = r; else this.readings = [];
             const n = localStorage.getItem(this.lsKeys.notes);
-            if (n) this.progressNotes = n;
-            const w = get(this.lsKeys.water);
-            if (w) this.waterChanges = w;
-            const a = get(this.lsKeys.additions);
-            if (a) this.additions = a;
-            const e = get(this.lsKeys.env);
-            if (e) this.environmentalFactors = e;
-            const s = get(this.lsKeys.source);
-            if (s) this.waterSources = s;
-            const b = get(this.lsKeys.bacterial);
-            if (b) this.bacterialHealth = b;
-            const c = get(this.lsKeys.critical);
-            if (c) this.criticalEvents = c;
-          },
-          // Water Changes
-          addWaterChange() {
-            const n = this.newWaterChange;
-            if (!n.date || !n.volume || !n.reason || !n.impact) {
-              alert("Fill all water change fields");
-              return;
-                  if (!confirm("Delete record?")) return;
-                  const removed = this.waterChanges.splice(i, 1)[0];
-                  this.queueUndo({ type: 'waterChanges', index: i, record: removed }, 'Water change deleted');
-            this.waterChanges.push({ id: crypto.randomUUID(), ...n });
-            this.newWaterChange = {
-              date: "",
-              volume: "",
-              reason: "",
-              impact: "",
-            };
-          },
-          deleteWaterChange(i) {
-            if (confirm("Delete record?")) this.waterChanges.splice(i, 1);
-          },
-          persistWater() {
-            localStorage.setItem(
-              this.lsKeys.water,
-              JSON.stringify(this.waterChanges)
-            );
-          },
-          // Additions
-          addAddition() {
-            const n = this.newAddition;
-            if (!n.date || !n.product || !n.quantity || !n.reason) {
-              alert("Fill all addition fields");
-              return;
-                  if (!confirm("Delete record?")) return;
-                  const removed = this.additions.splice(i, 1)[0];
-                  this.queueUndo({ type: 'additions', index: i, record: removed }, 'Addition deleted');
-            this.additions.push({ id: crypto.randomUUID(), ...n });
-            this.newAddition = {
-              date: "",
-              product: "",
-              quantity: "",
-              reason: "",
-            };
-          },
-          deleteAddition(i) {
-            if (confirm("Delete record?")) this.additions.splice(i, 1);
-          },
-          persistAdditions() {
-            localStorage.setItem(
-              this.lsKeys.additions,
-              JSON.stringify(this.additions)
-            );
-          },
-          // Environmental
-          addEnvironmental() {
-            const n = this.newEnvironmental;
-            if (!n.date || !n.type || !n.description || !n.impact) {
-              alert("Fill all environmental fields");
-              return;
-                  if (!confirm("Delete record?")) return;
-                  const removed = this.environmentalFactors.splice(i, 1)[0];
-                  this.queueUndo({ type: 'environmentalFactors', index: i, record: removed }, 'Environmental factor deleted');
-            this.newEnvironmental = {
-              date: "",
-              type: "",
-              description: "",
-              impact: "",
-            };
-          },
-          deleteEnvironmental(i) {
-            if (confirm("Delete record?"))
-              this.environmentalFactors.splice(i, 1);
-          },
-          persistEnv() {
-            localStorage.setItem(
-              this.lsKeys.env,
-              JSON.stringify(this.environmentalFactors)
-            );
-          },
-          // Water source
-          addWaterSource() {
-            const n = this.newWaterSource;
-            if (!n.date || !n.batch || !n.treatment || !n.municipal) {
-              alert("Fill all water source fields");
-              return;
-                  if (!confirm("Delete record?")) return;
-                  const removed = this.waterSources.splice(i, 1)[0];
-                  this.queueUndo({ type: 'waterSources', index: i, record: removed }, 'Water source deleted');
-            this.waterSources.push({ id: crypto.randomUUID(), ...n });
-            this.newWaterSource = {
-              date: "",
-              batch: "",
-              treatment: "",
-              municipal: "",
-            };
-          },
-          deleteWaterSource(i) {
-            if (confirm("Delete record?")) this.waterSources.splice(i, 1);
-          },
-          persistSource() {
-            localStorage.setItem(
-              this.lsKeys.source,
-              JSON.stringify(this.waterSources)
-            );
-          },
-          // Bacterial
-          addBacterial() {
-            const n = this.newBacterial;
-            if (!n.date || !n.clarity || !n.surface || !n.odor || !n.biofilm) {
-              alert("Fill all bacterial fields");
-              return;
+            if (n) this.progressNotes = n; else this.progressNotes = '';
+            // Seed first reading for new tank if empty
+            if (this.readings.length === 0) {
+              this.readings.push({
+                id: crypto.randomUUID(),
+                date: this.today(),
+                day: 1,
+                ammonia: "4.0",
+                nitrite: "0",
+                nitrate: "0",
+                ph: "9.0",
+                temp: "82",
+                dosed: "Yes - Initial",
+                notes: "Day 1 - Added live bacteria + ammonia",
+              });
             }
-                  if (!confirm("Delete record?")) return;
-                  const removed = this.bacterialHealth.splice(i, 1)[0];
-                  this.queueUndo({ type: 'bacterialHealth', index: i, record: removed }, 'Bacterial health record deleted');
-            this.newBacterial = {
-              date: "",
-              clarity: "",
-              surface: "",
-              odor: "",
-              biofilm: "",
+            this.resetNewReading();
+          },
+          // Undo logic
+          queueUndo(payload, message) {
+            if (this.undo.timeoutId) clearTimeout(this.undo.timeoutId);
+            this.undo.payload = payload;
+            this.undo.message = message;
+            this.undo.visible = true;
+            this.undo.timeoutId = setTimeout(() => {
+              this.undo.visible = false;
+              this.undo.payload = null;
+            }, this.undo.ttl);
+          },
+          performUndo() {
+            if (!this.undo.payload) return;
+            const { type, index, record } = this.undo.payload;
+            if (Array.isArray(this[type])) {
+              this[type].splice(index, 0, record);
+            }
+            this.dismissUndo();
+          },
+          dismissUndo() {
+            if (this.undo.timeoutId) clearTimeout(this.undo.timeoutId);
+            this.undo.visible = false;
+            this.undo.payload = null;
+          },
+          // Tank / Namespacing
+          initTanks() {
+            const stored = JSON.parse(localStorage.getItem('aquariumTankList') || 'null');
+            if (Array.isArray(stored) && stored.length) {
+              this.tankList = stored;
+            } else {
+              this.tankList = ['Default Tank'];
+              localStorage.setItem('aquariumTankList', JSON.stringify(this.tankList));
+            }
+            this.currentTank = this.tankList[0];
+            this.updateNamespace();
+            this.loadAll();
+          },
+          updateNamespace() {
+            const ns = this.currentTank.replace(/\s+/g,'_').toLowerCase();
+            this.tankStorageNamespace = ns;
+            this.lsKeys = {
+              readings: `aquarium_${ns}_cycleData`,
+              notes: `aquarium_${ns}_progressNotes`,
             };
           },
-          deleteBacterial(i) {
-            if (confirm("Delete record?")) this.bacterialHealth.splice(i, 1);
+          saveTankList() {
+            localStorage.setItem('aquariumTankList', JSON.stringify(this.tankList));
           },
-          persistBacterial() {
-            localStorage.setItem(
-              this.lsKeys.bacterial,
-              JSON.stringify(this.bacterialHealth)
-            );
+          addTank() {
+            const name = (this.newTankName || '').trim();
+            if (!name) { alert('Enter a tank name'); return; }
+            if (this.tankList.includes(name)) { alert('Tank already exists'); return; }
+            this.tankList.push(name);
+            this.saveTankList();
+            this.currentTank = name;
+            this.newTankName = '';
           },
-          // Critical events
-          addCritical() {
-            const n = this.newCritical;
-            if (!n.date || !n.eventType || !n.reading || !n.significance) {
-              alert("Fill all critical event fields");
-              return;
-                  if (!confirm("Delete record?")) return;
-                  const removed = this.criticalEvents.splice(i, 1)[0];
-                  this.queueUndo({ type: 'criticalEvents', index: i, record: removed }, 'Critical event deleted');
-            this.criticalEvents.push({ id: crypto.randomUUID(), ...n });
-            this.newCritical = {
-              date: "",
-              eventType: "",
-              reading: "",
-              significance: "",
+          duplicateTank() {
+            if (!this.currentTank) return;
+            const base = this.currentTank + ' Copy';
+            let name = base; let i=2;
+            while (this.tankList.includes(name)) { name = base + ' ' + i++; }
+            this.tankList.push(name);
+            this.saveTankList();
+            // Copy data from current into new tank namespace
+            const oldNs = this.tankStorageNamespace;
+            const newNs = name.replace(/\s+/g,'_').toLowerCase();
+            const mappings = ['cycleData','progressNotes'];
+            mappings.forEach(suffix => {
+              const oldKey = `aquarium_${oldNs}_${suffix}`;
+              const newKey = `aquarium_${newNs}_${suffix}`;
+              const val = localStorage.getItem(oldKey);
+              if (val) localStorage.setItem(newKey, val);
+            });
+            this.currentTank = name;
+          },
+          deleteTank() {
+            if (this.tankList.length <=1) { alert('Cannot delete last tank'); return; }
+            if (!confirm('Delete tank "' + this.currentTank + '" and all its data?')) return;
+            const ns = this.tankStorageNamespace;
+            const keys = Object.values({
+              readings: `aquarium_${ns}_cycleData`,
+              notes: `aquarium_${ns}_progressNotes`,
+            });
+            keys.forEach(k=>localStorage.removeItem(k));
+            this.tankList = this.tankList.filter(t=>t!==this.currentTank);
+            this.saveTankList();
+            this.currentTank = this.tankList[0];
+          },
+          // JSON Import/Export
+          exportToJSON() {
+            const payload = {
+              meta: { version: 1, exportedAt: new Date().toISOString(), tank: this.currentTank },
+              tankList: this.tankList,
+              currentTank: this.currentTank,
+              readings: this.readings,
+              progressNotes: this.progressNotes,
             };
-                // Undo logic
-                queueUndo(payload, message) {
-                  if (this.undo.timeoutId) clearTimeout(this.undo.timeoutId);
-                  this.undo.payload = payload;
-                  this.undo.message = message;
-                  this.undo.visible = true;
-                  this.undo.timeoutId = setTimeout(() => {
-                    this.undo.visible = false;
-                    this.undo.payload = null;
-                  }, this.undo.ttl);
-                },
-                  performUndo() {
-                    if (!this.undo.payload) return;
-                    const { type, index, record } = this.undo.payload;
-                    if (Array.isArray(this[type])) {
-                      this[type].splice(index, 0, record);
-                    }
-                    this.dismissUndo();
-                  },
-                  dismissUndo() {
-                    if (this.undo.timeoutId) clearTimeout(this.undo.timeoutId);
-                    this.undo.visible = false;
-                    this.undo.payload = null;
-                  },
-                // Tank / Namespacing
-                initTanks() {
-                  const stored = JSON.parse(localStorage.getItem('aquariumTankList') || 'null');
-                  if (Array.isArray(stored) && stored.length) {
-                    this.tankList = stored;
-                  } else {
-                    this.tankList = ['Default Tank'];
-                    localStorage.setItem('aquariumTankList', JSON.stringify(this.tankList));
-                  }
-                  this.currentTank = this.tankList[0];
-                  this.updateNamespace();
-                  this.loadAll();
-                },
-                updateNamespace() {
-                  const ns = this.currentTank.replace(/\s+/g,'_').toLowerCase();
-                  this.tankStorageNamespace = ns;
-                  this.lsKeys = {
-                    readings: `aquarium_${ns}_cycleData`,
-                    notes: `aquarium_${ns}_progressNotes`,
-                    water: `aquarium_${ns}_waterChanges`,
-                    additions: `aquarium_${ns}_tankAdditions`,
-                    env: `aquarium_${ns}_environmentalFactors`,
-                    source: `aquarium_${ns}_waterSource`,
-                    bacterial: `aquarium_${ns}_bacterialHealth`,
-                    critical: `aquarium_${ns}_criticalEvents`,
-                  };
-                },
-                saveTankList() {
-                  localStorage.setItem('aquariumTankList', JSON.stringify(this.tankList));
-                },
-                addTank() {
-                  const name = (this.newTankName || '').trim();
-                  if (!name) { alert('Enter a tank name'); return; }
-                  if (this.tankList.includes(name)) { alert('Tank already exists'); return; }
-                  this.tankList.push(name);
+            const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `aquarium_${this.tankStorageNamespace}_data.json`;
+            a.click();
+          },
+          triggerImportJSON() {
+            this.$refs.importInput.click();
+          },
+          handleImportJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+              try {
+                const data = JSON.parse(reader.result);
+                if (!data.readings) throw new Error('Invalid file');
+                if (!confirm('Replace current tank data with imported content?')) return;
+                // If tank list present, merge new tanks
+                if (Array.isArray(data.tankList)) {
+                  data.tankList.forEach(t=>{ if(!this.tankList.includes(t)) this.tankList.push(t); });
                   this.saveTankList();
-                  this.currentTank = name;
-                  this.newTankName = '';
-                },
-                duplicateTank() {
-                  if (!this.currentTank) return;
-                  const base = this.currentTank + ' Copy';
-                  let name = base; let i=2;
-                  while (this.tankList.includes(name)) { name = base + ' ' + i++; }
-                  this.tankList.push(name);
-                  this.saveTankList();
-                  // Copy data from current into new tank namespace
-                  const oldNs = this.tankStorageNamespace;
-                  const newNs = name.replace(/\s+/g,'_').toLowerCase();
-                  const mappings = ['cycleData','progressNotes','waterChanges','tankAdditions','environmentalFactors','waterSource','bacterialHealth','criticalEvents'];
-                  mappings.forEach(suffix => {
-                    const oldKey = `aquarium_${oldNs}_${suffix}`;
-                    const newKey = `aquarium_${newNs}_${suffix}`;
-                    const val = localStorage.getItem(oldKey);
-                    if (val) localStorage.setItem(newKey, val);
-                  });
-                  this.currentTank = name;
-                },
-                deleteTank() {
-                  if (this.tankList.length <=1) { alert('Cannot delete last tank'); return; }
-                  if (!confirm('Delete tank "' + this.currentTank + '" and all its data?')) return;
-                  const ns = this.tankStorageNamespace;
-                  const keys = Object.values({
-                    readings: `aquarium_${ns}_cycleData`,
-                    notes: `aquarium_${ns}_progressNotes`,
-                    water: `aquarium_${ns}_waterChanges`,
-                    additions: `aquarium_${ns}_tankAdditions`,
-                    env: `aquarium_${ns}_environmentalFactors`,
-                    source: `aquarium_${ns}_waterSource`,
-                    bacterial: `aquarium_${ns}_bacterialHealth`,
-                    critical: `aquarium_${ns}_criticalEvents`,
-                  });
-                  keys.forEach(k=>localStorage.removeItem(k));
-                  this.tankList = this.tankList.filter(t=>t!==this.currentTank);
-                  this.saveTankList();
-                  this.currentTank = this.tankList[0];
-                },
-                // JSON Import/Export
-                exportToJSON() {
-                  const payload = {
-                    meta: { version: 1, exportedAt: new Date().toISOString(), tank: this.currentTank },
-                    tankList: this.tankList,
-                    currentTank: this.currentTank,
-                    readings: this.readings,
-                    progressNotes: this.progressNotes,
-                    waterChanges: this.waterChanges,
-                    additions: this.additions,
-                    environmentalFactors: this.environmentalFactors,
-                    waterSources: this.waterSources,
-                    bacterialHealth: this.bacterialHealth,
-                    criticalEvents: this.criticalEvents,
-                  };
-                  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-                  const a = document.createElement('a');
-                  a.href = URL.createObjectURL(blob);
-                  a.download = `aquarium_${this.tankStorageNamespace}_data.json`;
-                  a.click();
-                },
-                triggerImportJSON() {
-                  this.$refs.importInput.click();
-                },
-                handleImportJSON(e) {
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    try {
-                      const data = JSON.parse(reader.result);
-                      if (!data.readings) throw new Error('Invalid file');
-                      if (!confirm('Replace current tank data with imported content?')) return;
-                      // If tank list present, merge new tanks
-                      if (Array.isArray(data.tankList)) {
-                        data.tankList.forEach(t=>{ if(!this.tankList.includes(t)) this.tankList.push(t); });
-                        this.saveTankList();
-                      }
-                      // If tank names differ, import just into current tank
-                      this.readings = data.readings || [];
-                      this.progressNotes = data.progressNotes || '';
-                      this.waterChanges = data.waterChanges || [];
-                      this.additions = data.additions || [];
-                      this.environmentalFactors = data.environmentalFactors || [];
-                      this.waterSources = data.waterSources || [];
-                      this.bacterialHealth = data.bacterialHealth || [];
-                      this.criticalEvents = data.criticalEvents || [];
-                      this.persistAll();
-                      this.updateChart();
-                      this.recomputePredictions();
-                      alert('Import complete');
-                    } catch(err) {
-                      alert('Import failed: ' + err.message);
-                    } finally {
-                      e.target.value = '';
-                    }
-                  };
-                  reader.readAsText(file);
-                },
-                // Chart Logic
-                setupChart() {
-                  const ctx = document.getElementById('cycleChart');
-                  if (!ctx) return;
-                  const phasePlugin = {
-                    id: 'phaseShading',
-                    beforeDraw: (chart) => {
-                      const { ctx, chartArea, scales } = chart;
-                      if (!chartArea) return;
-                      const x = scales.x;
-                      const phases = [
-                        { label: 'P1', start: 1, end: 14, color: 'rgba(220,38,38,0.08)' },
-                        { label: 'P2', start: 14, end: 28, color: 'rgba(234,88,12,0.08)' },
-                        { label: 'P3', start: 28, end: 999, color: 'rgba(16,185,129,0.08)' },
-                      ];
-                      ctx.save();
-                      phases.forEach(p => {
-                        const xStart = x.getPixelForValue(p.start);
-                        const xEnd = x.getPixelForValue(p.end);
-                        ctx.fillStyle = p.color;
-                        ctx.fillRect(xStart, chartArea.top, xEnd - xStart, chartArea.bottom - chartArea.top);
-                      });
-                      ctx.restore();
-                    }
-                  };
-                  this.chart = new Chart(ctx, {
-                    type: 'line',
-                    data: { labels: [], datasets: [] },
-                    options: {
-                      responsive: true,
-                      interaction: { mode: 'index', intersect: false },
-                      stacked: false,
-                      plugins: { legend: { position: 'bottom' } },
-                      scales: {
-                        x: { title: { display: true, text: 'Cycle Day' } },
-                        ammonia: { type: 'linear', position: 'left', title:{display:true,text:'Ammonia/Nitrite (ppm)'}, min:0 },
-                        nitrate: { type: 'linear', position: 'right', title:{display:true,text:'Nitrate (ppm)'}, grid:{drawOnChartArea:false}, min:0 },
-                        ph: { type: 'linear', position: 'right', title:{display:true,text:'pH'}, grid:{drawOnChartArea:false}, min:5, max:10 },
-                      },
-                    },
-                    plugins: [phasePlugin]
-                  });
-                },
-                updateChart() {
-                  if (!this.chart) return;
-                  const labels = this.readings.map(r=>Number(r.day));
-                  const dsBase = (label, data, color, yAxisID) => ({
-                    label, data, borderColor: color, backgroundColor: color, tension: 0.2, yAxisID, spanGaps: true, pointRadius: 3, pointHoverRadius: 5
-                  });
-                  const ammonia = this.readings.map(r=> parseFloat(r.ammonia)||null);
-                  const nitrite = this.readings.map(r=> parseFloat(r.nitrite)||null);
-                  const nitrate = this.readings.map(r=> parseFloat(r.nitrate)||null);
-                  const ph = this.readings.map(r=> parseFloat(r.ph)||null);
-                  this.chart.data.labels = labels;
-                  this.chart.data.datasets = [
-                    dsBase('Ammonia', ammonia, 'rgba(239,68,68,1)', 'ammonia'),
-                    dsBase('Nitrite', nitrite, 'rgba(249,115,22,1)', 'ammonia'),
-                    dsBase('Nitrate', nitrate, 'rgba(34,197,94,1)', 'nitrate'),
-                    dsBase('pH', ph, 'rgba(139,92,246,1)', 'ph'),
-                  ];
-                  this.chart.update('none');
-                },
-                refreshChart() { this.updateChart(); },
-                // Prediction helpers
-                linearRegression(points) {
-                  if (points.length < 2) return null;
-                  const n = points.length;
-                  let sumX=0,sumY=0,sumXY=0,sumX2=0;
-                  points.forEach(([x,y])=>{ sumX+=x; sumY+=y; sumXY+=x*y; sumX2+=x*x; });
-                  const denom = (n*sumX2 - sumX*sumX);
-                  if (denom === 0) return null;
-                  const m = (n*sumXY - sumX*sumY)/denom;
-                  const b = (sumY - m*sumX)/n;
-                  return { m, b };
-                },
-                formatPredictionRate(m) { if (m===null || m===undefined) return '—'; return (m>0?'+':'') + m.toFixed(3) + ' /day'; },
-                estimateDate(days) {
-                  if (days===null || days===undefined || !isFinite(days)) return null;
-                  const lastDateStr = this.readings.length ? this.readings[this.readings.length-1].date : this.today();
-                  const d = new Date(lastDateStr + 'T00:00:00');
-                  d.setDate(d.getDate() + Math.max(0, Math.round(days)));
-                  return d.toISOString().split('T')[0];
-                },
-                recomputePredictions() {
-                  const recent = (key, max=10) => {
-                    const pts = this.readings.filter(r=> r[key]!=='' && r[key]!==null)
-                      .slice(-max)
-                      .map(r=>[Number(r.day), parseFloat(r[key])]);
-                    return pts.filter(p=>!isNaN(p[0]) && !isNaN(p[1]));
-                  };
-                  const build = (key, targetValue, comparison='<=') => {
-                    const pts = recent(key);
-                    const lr = this.linearRegression(pts);
-                    const lastVal = pts.length? pts[pts.length-1][1] : null;
-                    let daysToTarget = null; let projectedDate = null;
-                    if (lr && lastVal!==null) {
-                      const m = lr.m; const b = lr.b;
-                      if (m!==0) {
-                        const xTarget = (targetValue - b)/m; // day at which we expect target
-                        const lastDay = pts[pts.length-1][0];
-                        daysToTarget = xTarget - lastDay;
-                        if (daysToTarget < 0) daysToTarget = 0;
-                        projectedDate = this.estimateDate(daysToTarget);
-                      }
-                    }
-                    return {
-                      rate: lr? lr.m : null,
-                      rateDisplay: this.formatPredictionRate(lr? lr.m : null),
-                      daysToTarget: (daysToTarget!==null && isFinite(daysToTarget))? daysToTarget : null,
-                      daysToTargetDisplay: (daysToTarget!==null && isFinite(daysToTarget))? daysToTarget.toFixed(1) : '—',
-                      projectedDate,
-                    };
-                  };
-                  // Ammonia & Nitrite targets 0.25 ppm
-                  this.predictions.ammonia = build('ammonia', 0.25, '<=');
-                  this.predictions.nitrite = build('nitrite', 0.25, '<=');
-                  // Nitrate: project +10 ppm increase from last value
-                  const nitratePts = recent('nitrate');
-                  const nitrateLr = this.linearRegression(nitratePts);
-                  if (nitrateLr && nitratePts.length) {
-                    const lastDay = nitratePts[nitratePts.length-1][0];
-                    const lastVal = nitratePts[nitratePts.length-1][1];
-                    const target = lastVal + 10;
-                    let days = null; let projectedDate = null;
-                    if (nitrateLr.m>0) {
-                      const xTarget = (target - nitrateLr.b)/nitrateLr.m;
-                      days = xTarget - lastDay;
-                      projectedDate = this.estimateDate(days);
-                    }
-                    this.predictions.nitrate = {
-                      rate: nitrateLr.m,
-                      rateDisplay: this.formatPredictionRate(nitrateLr.m),
-                      daysToPlus10: days,
-                      daysToPlus10Display: (days!==null && isFinite(days))? days.toFixed(1):'—',
-                      projectedDate,
-                    };
-                  } else {
-                    this.predictions.nitrate = { rate:null, rateDisplay:'—', daysToPlus10:null, daysToPlus10Display:'—', projectedDate:null };
-                  }
+                }
+                // Import data into current tank
+                this.readings = data.readings || [];
+                this.progressNotes = data.progressNotes || '';
+                this.persistAll();
+                this.updateChart();
+                this.recomputePredictions();
+                alert('Import complete');
+              } catch(err) {
+                alert('Import failed: ' + err.message);
+              } finally {
+                e.target.value = '';
+              }
+            };
+            reader.readAsText(file);
+          },
+          // Chart Logic
+          setupChart() {
+            const ctx = document.getElementById('cycleChart');
+            if (!ctx) return;
+            const phasePlugin = {
+              id: 'phaseShading',
+              beforeDraw: (chart) => {
+                const { ctx, chartArea, scales } = chart;
+                if (!chartArea) return;
+                const x = scales.x;
+                const phases = [
+                  { label: 'P1', start: 1, end: 14, color: 'rgba(220,38,38,0.08)' },
+                  { label: 'P2', start: 14, end: 28, color: 'rgba(234,88,12,0.08)' },
+                  { label: 'P3', start: 28, end: 999, color: 'rgba(16,185,129,0.08)' },
+                ];
+                ctx.save();
+                phases.forEach(p => {
+                  const xStart = x.getPixelForValue(p.start);
+                  const xEnd = x.getPixelForValue(p.end);
+                  ctx.fillStyle = p.color;
+                  ctx.fillRect(xStart, chartArea.top, xEnd - xStart, chartArea.bottom - chartArea.top);
+                });
+                ctx.restore();
+              }
+            };
+            this.chart = new Chart(ctx, {
+              type: 'line',
+              data: { labels: [], datasets: [] },
+              options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                stacked: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                  x: { title: { display: true, text: 'Cycle Day' } },
+                  ammonia: { type: 'linear', position: 'left', title:{display:true,text:'Ammonia/Nitrite (ppm)'}, min:0 },
+                  nitrate: { type: 'linear', position: 'right', title:{display:true,text:'Nitrate (ppm)'}, grid:{drawOnChartArea:false}, min:0 },
+                  ph: { type: 'linear', position: 'right', title:{display:true,text:'pH'}, grid:{drawOnChartArea:false}, min:5, max:10 },
                 },
               },
+              plugins: [phasePlugin]
+            });
           },
-          deleteCritical(i) {
-          <script>
-            // Simple fade transition support
-          </script>
-            if (confirm("Delete record?")) this.criticalEvents.splice(i, 1);
+          updateChart() {
+            if (!this.chart) return;
+            const labels = this.readings.map(r=>Number(r.day));
+            const dsBase = (label, data, color, yAxisID) => ({
+              label, data, borderColor: color, backgroundColor: color, tension: 0.2, yAxisID, spanGaps: true, pointRadius: 3, pointHoverRadius: 5
+            });
+            const ammonia = this.readings.map(r=> parseFloat(r.ammonia)||null);
+            const nitrite = this.readings.map(r=> parseFloat(r.nitrite)||null);
+            const nitrate = this.readings.map(r=> parseFloat(r.nitrate)||null);
+            const ph = this.readings.map(r=> parseFloat(r.ph)||null);
+            this.chart.data.labels = labels;
+            this.chart.data.datasets = [
+              dsBase('Ammonia', ammonia, 'rgba(239,68,68,1)', 'ammonia'),
+              dsBase('Nitrite', nitrite, 'rgba(249,115,22,1)', 'ammonia'),
+              dsBase('Nitrate', nitrate, 'rgba(34,197,94,1)', 'nitrate'),
+              dsBase('pH', ph, 'rgba(139,92,246,1)', 'ph'),
+            ];
+            this.chart.update('none');
           },
-          persistCritical() {
-            localStorage.setItem(
-              this.lsKeys.critical,
-              JSON.stringify(this.criticalEvents)
-            );
+          refreshChart() { this.updateChart(); },
+          // Prediction helpers
+          linearRegression(points) {
+            if (points.length < 2) return null;
+            const n = points.length;
+            let sumX=0,sumY=0,sumXY=0,sumX2=0;
+            points.forEach(([x,y])=>{ sumX+=x; sumY+=y; sumXY+=x*y; sumX2+=x*x; });
+            const denom = (n*sumX2 - sumX*sumX);
+            if (denom === 0) return null;
+            const m = (n*sumXY - sumX*sumY)/denom;
+            const b = (sumY - m*sumX)/n;
+            return { m, b };
+          },
+          formatPredictionRate(m) { if (m===null || m===undefined) return '—'; return (m>0?'+':'') + m.toFixed(3) + ' /day'; },
+          estimateDate(days) {
+            if (days===null || days===undefined || !isFinite(days)) return null;
+            const lastDateStr = this.readings.length ? this.readings[this.readings.length-1].date : this.today();
+            const d = new Date(lastDateStr + 'T00:00:00');
+            d.setDate(d.getDate() + Math.max(0, Math.round(days)));
+            return d.toISOString().split('T')[0];
+          },
+          recomputePredictions() {
+            const recent = (key, max=10) => {
+              const pts = this.readings.filter(r=> r[key]!=='' && r[key]!==null)
+                .slice(-max)
+                .map(r=>[Number(r.day), parseFloat(r[key])]);
+              return pts.filter(p=>!isNaN(p[0]) && !isNaN(p[1]));
+            };
+            const build = (key, targetValue, comparison='<=') => {
+              const pts = recent(key);
+              const lr = this.linearRegression(pts);
+              const lastVal = pts.length? pts[pts.length-1][1] : null;
+              let daysToTarget = null; let projectedDate = null;
+              if (lr && lastVal!==null) {
+                const m = lr.m; const b = lr.b;
+                if (m!==0) {
+                  const xTarget = (targetValue - b)/m; // day at which we expect target
+                  const lastDay = pts[pts.length-1][0];
+                  daysToTarget = xTarget - lastDay;
+                  if (daysToTarget < 0) daysToTarget = 0;
+                  projectedDate = this.estimateDate(daysToTarget);
+                }
+              }
+              return {
+                rate: lr? lr.m : null,
+                rateDisplay: this.formatPredictionRate(lr? lr.m : null),
+                daysToTarget: (daysToTarget!==null && isFinite(daysToTarget))? daysToTarget : null,
+                daysToTargetDisplay: (daysToTarget!==null && isFinite(daysToTarget))? daysToTarget.toFixed(1) : '—',
+                projectedDate,
+              };
+            };
+            // Ammonia & Nitrite targets 0.25 ppm
+            this.predictions.ammonia = build('ammonia', 0.25, '<=');
+            this.predictions.nitrite = build('nitrite', 0.25, '<=');
+            // Nitrate: project +10 ppm increase from last value
+            const nitratePts = recent('nitrate');
+            const nitrateLr = this.linearRegression(nitratePts);
+            if (nitrateLr && nitratePts.length) {
+              const lastDay = nitratePts[nitratePts.length-1][0];
+              const lastVal = nitratePts[nitratePts.length-1][1];
+              const target = lastVal + 10;
+              let days = null; let projectedDate = null;
+              if (nitrateLr.m>0) {
+                const xTarget = (target - nitrateLr.b)/nitrateLr.m;
+                days = xTarget - lastDay;
+                projectedDate = this.estimateDate(days);
+              }
+              this.predictions.nitrate = {
+                rate: nitrateLr.m,
+                rateDisplay: this.formatPredictionRate(nitrateLr.m),
+                daysToPlus10: days,
+                daysToPlus10Display: (days!==null && isFinite(days))? days.toFixed(1):'—',
+                projectedDate,
+              };
+            } else {
+              this.predictions.nitrate = { rate:null, rateDisplay:'—', daysToPlus10:null, daysToPlus10Display:'—', projectedDate:null };
+            }
           },
         },
       }).mount("#app");
