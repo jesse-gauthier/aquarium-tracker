@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0f172a" />
     <title>Aquarium Cycling Tracker</title>
     <script src="data/optimal.js"></script>
     <style>
@@ -48,6 +51,27 @@
       >
         Aquarium Cycling Data Tracker
       </h1>
+
+      <!-- Tank Selection / Multi-Tank Support -->
+      <div class="bg-indigo-50 border border-indigo-200 p-4 mb-6 flex flex-wrap gap-4 items-end">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Active Tank</label>
+          <select v-model="currentTank" class="px-3 py-2 border border-slate-300 text-sm bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-w-48">
+            <option v-for="t in tankList" :key="t" :value="t">{{ t }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">New Tank Name</label>
+          <input v-model="newTankName" placeholder="e.g., 20g QT" class="px-3 py-2 border border-slate-300 text-sm bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+        </div>
+        <button @click="addTank" class="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md">Add Tank</button>
+        <button @click="duplicateTank" class="h-10 px-4 bg-slate-600 hover:bg-slate-700 text-white text-sm font-semibold rounded-md" :disabled="!currentTank">Duplicate Tank</button>
+        <button @click="deleteTank" class="h-10 px-4 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-md" :disabled="tankList.length<=1">Delete Tank</button>
+        <div class="ml-auto flex gap-2 items-center text-xs text-slate-600">
+          <span class="font-semibold">Namespace:</span>
+          <code class="bg-white px-2 py-1 border border-slate-200 rounded">{{ tankStorageNamespace }}</code>
+        </div>
+      </div>
 
       <div class="bg-slate-50 border border-slate-200 p-6 mb-8">
         <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
@@ -415,6 +439,18 @@
         </tbody>
       </table>
 
+      <!-- Chart Section -->
+      <div class="bg-white border border-slate-200 p-6 mb-10">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold flex items-center gap-3">
+          <span>Parameter Trends</span>
+          <button @click="refreshChart" class="text-xs px-3 py-1.5 bg-slate-800 text-white rounded hover:bg-slate-900">Refresh</button>
+        </h3>
+        <canvas id="cycleChart" height="140"></canvas>
+        <p class="mt-3 text-xs text-slate-500">
+          Shaded background indicates approximate nitrogen cycle phase windows (Phase 1: red, Phase 2: orange, Phase 3: green). Actual phase badges derive from readings.
+        </p>
+      </div>
+
       <button
         class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         @click="addReading"
@@ -427,6 +463,19 @@
       >
         Export to CSV
       </button>
+      <button
+        class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        @click="exportToJSON"
+      >
+        Export JSON
+      </button>
+      <button
+        class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        @click="triggerImportJSON"
+      >
+        Import JSON
+      </button>
+      <input ref="importInput" type="file" accept="application/json" class="hidden" @change="handleImportJSON" />
       <button
         class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 border-none rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm transition-all duration-300 shadow-lg relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
         @click="persistAll"
@@ -1295,6 +1344,44 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           class="w-full h-32 p-4 border-2 border-gray-300 rounded-xl resize-y font-inherit text-sm leading-6 transition-all duration-300 focus:outline-none focus:border-blue-500 focus:shadow-md"
         ></textarea>
       </div>
+
+      <!-- Predictive Insights -->
+      <div class="mt-10 bg-gradient-to-br from-slate-800 to-slate-900 text-slate-100 p-6 rounded-2xl shadow-lg">
+        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+          <span>🔮 Predictive Insights</span>
+          <button @click="recomputePredictions" class="text-xs bg-slate-600 hover:bg-slate-500 px-2 py-1 rounded">Recompute</button>
+        </h3>
+        <div class="grid md:grid-cols-3 gap-5 text-sm">
+          <div class="bg-slate-700/40 p-4 rounded">
+            <h4 class="font-semibold mb-2 text-slate-200 text-xs tracking-wide uppercase">Ammonia Processing</h4>
+            <p class="m-0"><span class="font-medium">Rate:</span> {{ predictions.ammonia.rateDisplay }}</p>
+            <p class="m-0"><span class="font-medium">Est. Days to < 0.25:</span> {{ predictions.ammonia.daysToTargetDisplay }}</p>
+            <p class="m-0"><span class="font-medium">Projected Date:</span> {{ predictions.ammonia.projectedDate || '—' }}</p>
+          </div>
+          <div class="bg-slate-700/40 p-4 rounded">
+            <h4 class="font-semibold mb-2 text-slate-200 text-xs tracking-wide uppercase">Nitrite Resolution</h4>
+            <p class="m-0"><span class="font-medium">Rate:</span> {{ predictions.nitrite.rateDisplay }}</p>
+            <p class="m-0"><span class="font-medium">Est. Days to < 0.25:</span> {{ predictions.nitrite.daysToTargetDisplay }}</p>
+            <p class="m-0"><span class="font-medium">Projected Date:</span> {{ predictions.nitrite.projectedDate || '—' }}</p>
+          </div>
+          <div class="bg-slate-700/40 p-4 rounded">
+            <h4 class="font-semibold mb-2 text-slate-200 text-xs tracking-wide uppercase">Nitrate Accumulation</h4>
+            <p class="m-0"><span class="font-medium">Rate:</span> {{ predictions.nitrate.rateDisplay }}</p>
+            <p class="m-0"><span class="font-medium">Est. +10 ppm in:</span> {{ predictions.nitrate.daysToPlus10Display }}</p>
+            <p class="m-0"><span class="font-medium">Projected 10ppm Date:</span> {{ predictions.nitrate.projectedDate || '—' }}</p>
+          </div>
+        </div>
+        <p class="mt-4 text-[11px] text-slate-400">Estimates use simple linear regression on recent valid points (last 5–10). Real biological cycles are non-linear; treat as guidance only.</p>
+      </div>
+
+      <!-- Undo Snackbar -->
+      <transition name="fade">
+        <div v-if="undo.visible" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-4 text-sm z-50">
+          <span>{{ undo.message }}</span>
+          <button @click="performUndo" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-xs font-semibold">Undo</button>
+          <button @click="dismissUndo" class="px-2 py-1 text-slate-300 hover:text-white">✕</button>
+        </div>
+      </transition>
     </div>
 
     <script>
@@ -1302,6 +1389,11 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
       createApp({
         data() {
           return {
+            // Tanks
+            tankList: [],
+            currentTank: '',
+            newTankName: '',
+            tankStorageNamespace: '',
             // Core readings
             readings: [],
             newReading: {
@@ -1350,44 +1442,44 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               reading: "",
               significance: "",
             },
-            // LocalStorage keys
-            lsKeys: {
-              readings: "aquariumCycleData",
-              notes: "aquariumProgressNotes",
-              water: "aquariumWaterChanges",
-              additions: "aquariumTankAdditions",
-              env: "aquariumEnvironmentalFactors",
-              source: "aquariumWaterSource",
-              bacterial: "aquariumBacterialHealth",
-              critical: "aquariumCriticalEvents",
+            // LocalStorage keys (dynamic per tank)
+            lsKeys: {},
+            // Undo buffer
+            undo: {
+              visible: false,
+              timeoutId: null,
+              payload: null,
+              message: '',
+              ttl: 8000,
+            },
+            // Chart instance
+            chart: null,
+            // Predictive data
+            predictions: {
+              ammonia: {},
+              nitrite: {},
+              nitrate: {},
             },
           };
         },
         mounted() {
-          this.loadAll();
-          // Seed first reading if none
-          if (this.readings.length === 0) {
-            this.readings.push({
-              id: crypto.randomUUID(),
-              date: this.today(),
-              day: 1,
-              ammonia: "4.0",
-              nitrite: "0",
-              nitrate: "0",
-              ph: "9.0",
-              temp: "82",
-              dosed: "Yes - Initial",
-              notes: "Day 1 - Added live bacteria + ammonia",
-            });
+          this.initTanks();
+          this.$nextTick(() => {
+            this.setupChart();
+            this.updateChart();
+            this.recomputePredictions();
+          });
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(()=>{});
           }
-          // Initialize newReading defaults
-          this.resetNewReading();
         },
         watch: {
           readings: {
             deep: true,
             handler() {
               this.persistReadings();
+              this.updateChart();
+              this.recomputePredictions();
             },
           },
           progressNotes(value) {
@@ -1429,6 +1521,16 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               this.persistCritical();
             },
           },
+          currentTank(newVal, oldVal) {
+            if (newVal && newVal !== oldVal) {
+              this.updateNamespace();
+              this.loadAll();
+              this.$nextTick(() => {
+                this.updateChart();
+                this.recomputePredictions();
+              });
+            }
+          }
         },
         methods: {
           // Utility
@@ -1531,7 +1633,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             this.resetNewReading();
           },
           deleteReading(i) {
-            if (confirm("Delete this reading?")) this.readings.splice(i, 1);
+            if (!confirm("Delete this reading?")) return;
+            const removed = this.readings.splice(i, 1)[0];
+            this.queueUndo({ type: 'readings', index: i, record: removed }, 'Reading deleted');
           },
           exportToCSV() {
             const header = [
@@ -1587,6 +1691,8 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               JSON.stringify(this.readings)
             );
           },
+                  this.updateChart();
+                  this.recomputePredictions();
           persistAll() {
             this.persistReadings();
             localStorage.setItem(this.lsKeys.notes, this.progressNotes);
@@ -1613,6 +1719,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             this.criticalEvents = [];
             this.resetNewReading();
           },
+                    // Seed first reading for new tank
           loadAll() {
             const get = (k) => {
               try {
@@ -1644,7 +1751,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             if (!n.date || !n.volume || !n.reason || !n.impact) {
               alert("Fill all water change fields");
               return;
-            }
+                  if (!confirm("Delete record?")) return;
+                  const removed = this.waterChanges.splice(i, 1)[0];
+                  this.queueUndo({ type: 'waterChanges', index: i, record: removed }, 'Water change deleted');
             this.waterChanges.push({ id: crypto.randomUUID(), ...n });
             this.newWaterChange = {
               date: "",
@@ -1668,7 +1777,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             if (!n.date || !n.product || !n.quantity || !n.reason) {
               alert("Fill all addition fields");
               return;
-            }
+                  if (!confirm("Delete record?")) return;
+                  const removed = this.additions.splice(i, 1)[0];
+                  this.queueUndo({ type: 'additions', index: i, record: removed }, 'Addition deleted');
             this.additions.push({ id: crypto.randomUUID(), ...n });
             this.newAddition = {
               date: "",
@@ -1692,8 +1803,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             if (!n.date || !n.type || !n.description || !n.impact) {
               alert("Fill all environmental fields");
               return;
-            }
-            this.environmentalFactors.push({ id: crypto.randomUUID(), ...n });
+                  if (!confirm("Delete record?")) return;
+                  const removed = this.environmentalFactors.splice(i, 1)[0];
+                  this.queueUndo({ type: 'environmentalFactors', index: i, record: removed }, 'Environmental factor deleted');
             this.newEnvironmental = {
               date: "",
               type: "",
@@ -1717,7 +1829,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             if (!n.date || !n.batch || !n.treatment || !n.municipal) {
               alert("Fill all water source fields");
               return;
-            }
+                  if (!confirm("Delete record?")) return;
+                  const removed = this.waterSources.splice(i, 1)[0];
+                  this.queueUndo({ type: 'waterSources', index: i, record: removed }, 'Water source deleted');
             this.waterSources.push({ id: crypto.randomUUID(), ...n });
             this.newWaterSource = {
               date: "",
@@ -1742,7 +1856,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               alert("Fill all bacterial fields");
               return;
             }
-            this.bacterialHealth.push({ id: crypto.randomUUID(), ...n });
+                  if (!confirm("Delete record?")) return;
+                  const removed = this.bacterialHealth.splice(i, 1)[0];
+                  this.queueUndo({ type: 'bacterialHealth', index: i, record: removed }, 'Bacterial health record deleted');
             this.newBacterial = {
               date: "",
               clarity: "",
@@ -1766,7 +1882,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             if (!n.date || !n.eventType || !n.reading || !n.significance) {
               alert("Fill all critical event fields");
               return;
-            }
+                  if (!confirm("Delete record?")) return;
+                  const removed = this.criticalEvents.splice(i, 1)[0];
+                  this.queueUndo({ type: 'criticalEvents', index: i, record: removed }, 'Critical event deleted');
             this.criticalEvents.push({ id: crypto.randomUUID(), ...n });
             this.newCritical = {
               date: "",
@@ -1774,8 +1892,312 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               reading: "",
               significance: "",
             };
+                // Undo logic
+                queueUndo(payload, message) {
+                  if (this.undo.timeoutId) clearTimeout(this.undo.timeoutId);
+                  this.undo.payload = payload;
+                  this.undo.message = message;
+                  this.undo.visible = true;
+                  this.undo.timeoutId = setTimeout(() => {
+                    this.undo.visible = false;
+                    this.undo.payload = null;
+                  }, this.undo.ttl);
+                },
+                  performUndo() {
+                    if (!this.undo.payload) return;
+                    const { type, index, record } = this.undo.payload;
+                    if (Array.isArray(this[type])) {
+                      this[type].splice(index, 0, record);
+                    }
+                    this.dismissUndo();
+                  },
+                  dismissUndo() {
+                    if (this.undo.timeoutId) clearTimeout(this.undo.timeoutId);
+                    this.undo.visible = false;
+                    this.undo.payload = null;
+                  },
+                // Tank / Namespacing
+                initTanks() {
+                  const stored = JSON.parse(localStorage.getItem('aquariumTankList') || 'null');
+                  if (Array.isArray(stored) && stored.length) {
+                    this.tankList = stored;
+                  } else {
+                    this.tankList = ['Default Tank'];
+                    localStorage.setItem('aquariumTankList', JSON.stringify(this.tankList));
+                  }
+                  this.currentTank = this.tankList[0];
+                  this.updateNamespace();
+                  this.loadAll();
+                },
+                updateNamespace() {
+                  const ns = this.currentTank.replace(/\s+/g,'_').toLowerCase();
+                  this.tankStorageNamespace = ns;
+                  this.lsKeys = {
+                    readings: `aquarium_${ns}_cycleData`,
+                    notes: `aquarium_${ns}_progressNotes`,
+                    water: `aquarium_${ns}_waterChanges`,
+                    additions: `aquarium_${ns}_tankAdditions`,
+                    env: `aquarium_${ns}_environmentalFactors`,
+                    source: `aquarium_${ns}_waterSource`,
+                    bacterial: `aquarium_${ns}_bacterialHealth`,
+                    critical: `aquarium_${ns}_criticalEvents`,
+                  };
+                },
+                saveTankList() {
+                  localStorage.setItem('aquariumTankList', JSON.stringify(this.tankList));
+                },
+                addTank() {
+                  const name = (this.newTankName || '').trim();
+                  if (!name) { alert('Enter a tank name'); return; }
+                  if (this.tankList.includes(name)) { alert('Tank already exists'); return; }
+                  this.tankList.push(name);
+                  this.saveTankList();
+                  this.currentTank = name;
+                  this.newTankName = '';
+                },
+                duplicateTank() {
+                  if (!this.currentTank) return;
+                  const base = this.currentTank + ' Copy';
+                  let name = base; let i=2;
+                  while (this.tankList.includes(name)) { name = base + ' ' + i++; }
+                  this.tankList.push(name);
+                  this.saveTankList();
+                  // Copy data from current into new tank namespace
+                  const oldNs = this.tankStorageNamespace;
+                  const newNs = name.replace(/\s+/g,'_').toLowerCase();
+                  const mappings = ['cycleData','progressNotes','waterChanges','tankAdditions','environmentalFactors','waterSource','bacterialHealth','criticalEvents'];
+                  mappings.forEach(suffix => {
+                    const oldKey = `aquarium_${oldNs}_${suffix}`;
+                    const newKey = `aquarium_${newNs}_${suffix}`;
+                    const val = localStorage.getItem(oldKey);
+                    if (val) localStorage.setItem(newKey, val);
+                  });
+                  this.currentTank = name;
+                },
+                deleteTank() {
+                  if (this.tankList.length <=1) { alert('Cannot delete last tank'); return; }
+                  if (!confirm('Delete tank "' + this.currentTank + '" and all its data?')) return;
+                  const ns = this.tankStorageNamespace;
+                  const keys = Object.values({
+                    readings: `aquarium_${ns}_cycleData`,
+                    notes: `aquarium_${ns}_progressNotes`,
+                    water: `aquarium_${ns}_waterChanges`,
+                    additions: `aquarium_${ns}_tankAdditions`,
+                    env: `aquarium_${ns}_environmentalFactors`,
+                    source: `aquarium_${ns}_waterSource`,
+                    bacterial: `aquarium_${ns}_bacterialHealth`,
+                    critical: `aquarium_${ns}_criticalEvents`,
+                  });
+                  keys.forEach(k=>localStorage.removeItem(k));
+                  this.tankList = this.tankList.filter(t=>t!==this.currentTank);
+                  this.saveTankList();
+                  this.currentTank = this.tankList[0];
+                },
+                // JSON Import/Export
+                exportToJSON() {
+                  const payload = {
+                    meta: { version: 1, exportedAt: new Date().toISOString(), tank: this.currentTank },
+                    tankList: this.tankList,
+                    currentTank: this.currentTank,
+                    readings: this.readings,
+                    progressNotes: this.progressNotes,
+                    waterChanges: this.waterChanges,
+                    additions: this.additions,
+                    environmentalFactors: this.environmentalFactors,
+                    waterSources: this.waterSources,
+                    bacterialHealth: this.bacterialHealth,
+                    criticalEvents: this.criticalEvents,
+                  };
+                  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `aquarium_${this.tankStorageNamespace}_data.json`;
+                  a.click();
+                },
+                triggerImportJSON() {
+                  this.$refs.importInput.click();
+                },
+                handleImportJSON(e) {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    try {
+                      const data = JSON.parse(reader.result);
+                      if (!data.readings) throw new Error('Invalid file');
+                      if (!confirm('Replace current tank data with imported content?')) return;
+                      // If tank list present, merge new tanks
+                      if (Array.isArray(data.tankList)) {
+                        data.tankList.forEach(t=>{ if(!this.tankList.includes(t)) this.tankList.push(t); });
+                        this.saveTankList();
+                      }
+                      // If tank names differ, import just into current tank
+                      this.readings = data.readings || [];
+                      this.progressNotes = data.progressNotes || '';
+                      this.waterChanges = data.waterChanges || [];
+                      this.additions = data.additions || [];
+                      this.environmentalFactors = data.environmentalFactors || [];
+                      this.waterSources = data.waterSources || [];
+                      this.bacterialHealth = data.bacterialHealth || [];
+                      this.criticalEvents = data.criticalEvents || [];
+                      this.persistAll();
+                      this.updateChart();
+                      this.recomputePredictions();
+                      alert('Import complete');
+                    } catch(err) {
+                      alert('Import failed: ' + err.message);
+                    } finally {
+                      e.target.value = '';
+                    }
+                  };
+                  reader.readAsText(file);
+                },
+                // Chart Logic
+                setupChart() {
+                  const ctx = document.getElementById('cycleChart');
+                  if (!ctx) return;
+                  const phasePlugin = {
+                    id: 'phaseShading',
+                    beforeDraw: (chart) => {
+                      const { ctx, chartArea, scales } = chart;
+                      if (!chartArea) return;
+                      const x = scales.x;
+                      const phases = [
+                        { label: 'P1', start: 1, end: 14, color: 'rgba(220,38,38,0.08)' },
+                        { label: 'P2', start: 14, end: 28, color: 'rgba(234,88,12,0.08)' },
+                        { label: 'P3', start: 28, end: 999, color: 'rgba(16,185,129,0.08)' },
+                      ];
+                      ctx.save();
+                      phases.forEach(p => {
+                        const xStart = x.getPixelForValue(p.start);
+                        const xEnd = x.getPixelForValue(p.end);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(xStart, chartArea.top, xEnd - xStart, chartArea.bottom - chartArea.top);
+                      });
+                      ctx.restore();
+                    }
+                  };
+                  this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: [], datasets: [] },
+                    options: {
+                      responsive: true,
+                      interaction: { mode: 'index', intersect: false },
+                      stacked: false,
+                      plugins: { legend: { position: 'bottom' } },
+                      scales: {
+                        x: { title: { display: true, text: 'Cycle Day' } },
+                        ammonia: { type: 'linear', position: 'left', title:{display:true,text:'Ammonia/Nitrite (ppm)'}, min:0 },
+                        nitrate: { type: 'linear', position: 'right', title:{display:true,text:'Nitrate (ppm)'}, grid:{drawOnChartArea:false}, min:0 },
+                        ph: { type: 'linear', position: 'right', title:{display:true,text:'pH'}, grid:{drawOnChartArea:false}, min:5, max:10 },
+                      },
+                    },
+                    plugins: [phasePlugin]
+                  });
+                },
+                updateChart() {
+                  if (!this.chart) return;
+                  const labels = this.readings.map(r=>Number(r.day));
+                  const dsBase = (label, data, color, yAxisID) => ({
+                    label, data, borderColor: color, backgroundColor: color, tension: 0.2, yAxisID, spanGaps: true, pointRadius: 3, pointHoverRadius: 5
+                  });
+                  const ammonia = this.readings.map(r=> parseFloat(r.ammonia)||null);
+                  const nitrite = this.readings.map(r=> parseFloat(r.nitrite)||null);
+                  const nitrate = this.readings.map(r=> parseFloat(r.nitrate)||null);
+                  const ph = this.readings.map(r=> parseFloat(r.ph)||null);
+                  this.chart.data.labels = labels;
+                  this.chart.data.datasets = [
+                    dsBase('Ammonia', ammonia, 'rgba(239,68,68,1)', 'ammonia'),
+                    dsBase('Nitrite', nitrite, 'rgba(249,115,22,1)', 'ammonia'),
+                    dsBase('Nitrate', nitrate, 'rgba(34,197,94,1)', 'nitrate'),
+                    dsBase('pH', ph, 'rgba(139,92,246,1)', 'ph'),
+                  ];
+                  this.chart.update('none');
+                },
+                refreshChart() { this.updateChart(); },
+                // Prediction helpers
+                linearRegression(points) {
+                  if (points.length < 2) return null;
+                  const n = points.length;
+                  let sumX=0,sumY=0,sumXY=0,sumX2=0;
+                  points.forEach(([x,y])=>{ sumX+=x; sumY+=y; sumXY+=x*y; sumX2+=x*x; });
+                  const denom = (n*sumX2 - sumX*sumX);
+                  if (denom === 0) return null;
+                  const m = (n*sumXY - sumX*sumY)/denom;
+                  const b = (sumY - m*sumX)/n;
+                  return { m, b };
+                },
+                formatPredictionRate(m) { if (m===null || m===undefined) return '—'; return (m>0?'+':'') + m.toFixed(3) + ' /day'; },
+                estimateDate(days) {
+                  if (days===null || days===undefined || !isFinite(days)) return null;
+                  const lastDateStr = this.readings.length ? this.readings[this.readings.length-1].date : this.today();
+                  const d = new Date(lastDateStr + 'T00:00:00');
+                  d.setDate(d.getDate() + Math.max(0, Math.round(days)));
+                  return d.toISOString().split('T')[0];
+                },
+                recomputePredictions() {
+                  const recent = (key, max=10) => {
+                    const pts = this.readings.filter(r=> r[key]!=='' && r[key]!==null)
+                      .slice(-max)
+                      .map(r=>[Number(r.day), parseFloat(r[key])]);
+                    return pts.filter(p=>!isNaN(p[0]) && !isNaN(p[1]));
+                  };
+                  const build = (key, targetValue, comparison='<=') => {
+                    const pts = recent(key);
+                    const lr = this.linearRegression(pts);
+                    const lastVal = pts.length? pts[pts.length-1][1] : null;
+                    let daysToTarget = null; let projectedDate = null;
+                    if (lr && lastVal!==null) {
+                      const m = lr.m; const b = lr.b;
+                      if (m!==0) {
+                        const xTarget = (targetValue - b)/m; // day at which we expect target
+                        const lastDay = pts[pts.length-1][0];
+                        daysToTarget = xTarget - lastDay;
+                        if (daysToTarget < 0) daysToTarget = 0;
+                        projectedDate = this.estimateDate(daysToTarget);
+                      }
+                    }
+                    return {
+                      rate: lr? lr.m : null,
+                      rateDisplay: this.formatPredictionRate(lr? lr.m : null),
+                      daysToTarget: (daysToTarget!==null && isFinite(daysToTarget))? daysToTarget : null,
+                      daysToTargetDisplay: (daysToTarget!==null && isFinite(daysToTarget))? daysToTarget.toFixed(1) : '—',
+                      projectedDate,
+                    };
+                  };
+                  // Ammonia & Nitrite targets 0.25 ppm
+                  this.predictions.ammonia = build('ammonia', 0.25, '<=');
+                  this.predictions.nitrite = build('nitrite', 0.25, '<=');
+                  // Nitrate: project +10 ppm increase from last value
+                  const nitratePts = recent('nitrate');
+                  const nitrateLr = this.linearRegression(nitratePts);
+                  if (nitrateLr && nitratePts.length) {
+                    const lastDay = nitratePts[nitratePts.length-1][0];
+                    const lastVal = nitratePts[nitratePts.length-1][1];
+                    const target = lastVal + 10;
+                    let days = null; let projectedDate = null;
+                    if (nitrateLr.m>0) {
+                      const xTarget = (target - nitrateLr.b)/nitrateLr.m;
+                      days = xTarget - lastDay;
+                      projectedDate = this.estimateDate(days);
+                    }
+                    this.predictions.nitrate = {
+                      rate: nitrateLr.m,
+                      rateDisplay: this.formatPredictionRate(nitrateLr.m),
+                      daysToPlus10: days,
+                      daysToPlus10Display: (days!==null && isFinite(days))? days.toFixed(1):'—',
+                      projectedDate,
+                    };
+                  } else {
+                    this.predictions.nitrate = { rate:null, rateDisplay:'—', daysToPlus10:null, daysToPlus10Display:'—', projectedDate:null };
+                  }
+                },
+              },
           },
           deleteCritical(i) {
+          <script>
+            // Simple fade transition support
+          </script>
             if (confirm("Delete record?")) this.criticalEvents.splice(i, 1);
           },
           persistCritical() {
