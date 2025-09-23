@@ -1,0 +1,26 @@
+{
+  "name": "Aquarium Cycling Tracker",
+  "short_name": "AquariumTracker",
+  "description": "Track nitrogen cycle parameters for aquarium setup and maintenance",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMTYiIGZpbGw9IiMwZjE3MmEiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj4KICA8cGF0aCBkPSJNMjAgN0gyMGMwLTEuMS0uOS0yLTItMkg2Yy0xLjEgMC0yIC45LTIgMnYxMGMwIDEuMS45IDIgMiAyaDEyYzEuMSAwIDItLjkgMi0yVjdaIiBzdHJva2U9IiNkMWZhZTUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxwYXRoIGQ9Ik0yIDdoMTgiIHN0cm9rZT0iI2QxZmFlNSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGNpcmNsZSBjeD0iOCIgY3k9IjEyIiByPSIxLjUiIGZpbGw9IiNmOTc5MTYiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjEyIiByPSIxLjUiIGZpbGw9IiNkYzI2MjYiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjE1IiByPSIxLjUiIGZpbGw9IiMxNmE5NGEiLz4KPC9zdmc+CjwvZz4KPC9zdmc+",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNDQiIGZpbGw9IiMwZjE3MmEiLz4KPHN2ZyB4PSIxMjgiIHk9IjEyOCIgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CiAgPHBhdGggZD0iTTIwIDdIMjBjMC0xLjEtLjktMi0yLTJINmMtMS4xIDAtMiAuOS0yIDJ2MTBJMCAXMS4xLS45IDItLjkgMmgxMmMxLjEgMCAyLS45IDItMlY3WiIgc3Ryb2tlPSIjZDFmYWU1IiBzdHJva2Utd2lkdGg9IjMiLz4KICA8cGF0aCBkPSJNMiA3aDE4IiBzdHJva2U9IiNkMWZhZTUiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxjaXJjbGUgY3g9IjgiIGN5PSIxMiIgcj0iMiIgZmlsbD0iI2Y5NzMxNiIvPgogIDxjaXJjbGUgY3g9IjE2IiBjeT0iMTIiIHI9IjIiIGZpbGw9IiNkYzI2MjYiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjE1IiByPSIyIiBmaWxsPSIjMTZhOTRhIi8+CjwvZz4KPC9zdmc+Cjwvc3ZnPg==",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"]
+}

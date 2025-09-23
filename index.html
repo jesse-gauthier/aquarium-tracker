@@ -501,6 +501,842 @@
         </p>
       </div>
 
+      <!-- Water Changes Section -->
+      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
+          💧 Water Changes Log
+        </h3>
+        <table
+          id="waterChangesTable"
+          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr class="bg-gray-700 text-white">
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Date
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Volume Changed
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Reason
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Impact on Cycle
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
+          >
+            <tr
+              v-for="(w,i) in waterChanges"
+              :key="w.id"
+              :class="[i % 2 === 1 ? 'bg-gray-50':'','hover:bg-slate-50']"
+            >
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ w.date }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ w.volume }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ w.reason }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ w.impact }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                <button
+                  @click="deleteWaterChange(i)"
+                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md cursor-pointer text-xs font-medium"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr class="bg-gray-50 border-t-2 border-gray-300">
+              <td class="px-2 py-4">
+                <input
+                  type="date"
+                  v-model="newWaterChange.date"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newWaterChange.volume"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select volume...</option>
+                  <option value="25% (9.25 gal)">25% (9.25 gal)</option>
+                  <option value="50% (18.5 gal)">50% (18.5 gal)</option>
+                  <option value="75% (27.75 gal)">75% (27.75 gal)</option>
+                  <option value="Custom">Custom</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newWaterChange.reason"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select reason...</option>
+                  <option value="Nitrite spike >5ppm">
+                    Nitrite spike >5ppm
+                  </option>
+                  <option value="Regular maintenance">
+                    Regular maintenance
+                  </option>
+                  <option value="Ammonia too high">Ammonia too high</option>
+                  <option value="pH adjustment needed">
+                    pH adjustment needed
+                  </option>
+                  <option value="Emergency">Emergency</option>
+                  <option value="Other">Other</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newWaterChange.impact"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select impact...</option>
+                  <option value="Minimal - cycle continues">
+                    Minimal - cycle continues
+                  </option>
+                  <option value="Moderate - some bacterial loss">
+                    Moderate - some bacterial loss
+                  </option>
+                  <option value="Significant - cycle reset">
+                    Significant - cycle reset
+                  </option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          class="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
+          @click="addWaterChange"
+        >
+          Log Water Change
+        </button>
+      </div>
+
+      <!-- Tank Additions/Interventions Section -->
+      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
+          🧪 Tank Additions & Interventions
+        </h3>
+        <table
+          id="additionsTable"
+          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr class="bg-gray-700 text-white">
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Date Added
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Product/Item
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Quantity/Dosage
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Reason
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
+          >
+            <tr
+              v-for="(a,i) in additions"
+              :key="a.id"
+              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
+            >
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ a.date }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ a.product }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ a.quantity }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ a.reason }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                <button
+                  @click="deleteAddition(i)"
+                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr class="bg-gray-50 border-t-2 border-gray-300">
+              <td class="px-2 py-4">
+                <input
+                  type="date"
+                  v-model="newAddition.date"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newAddition.product"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select product...</option>
+                  <option value="Bacteria dose">Bacteria dose</option>
+                  <option value="pH Down">pH Down</option>
+                  <option value="pH Up">pH Up</option>
+                  <option value="Aquarium salt">Aquarium salt</option>
+                  <option value="Water conditioner">Water conditioner</option>
+                  <option value="Live plants">Live plants</option>
+                  <option value="Decorations">Decorations</option>
+                  <option value="Filter media">Filter media</option>
+                  <option value="Activated carbon">Activated carbon</option>
+                  <option value="Bio balls">Bio balls</option>
+                  <option value="Other">Other</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <input
+                  type="text"
+                  v-model="newAddition.quantity"
+                  placeholder="e.g., 5ml, 1 dose, 3 plants"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newAddition.reason"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select reason...</option>
+                  <option value="Boost bacterial colony">
+                    Boost bacterial colony
+                  </option>
+                  <option value="pH adjustment">pH adjustment</option>
+                  <option value="Water conditioning">Water conditioning</option>
+                  <option value="Aesthetic improvement">
+                    Aesthetic improvement
+                  </option>
+                  <option value="Biological filtration">
+                    Biological filtration
+                  </option>
+                  <option value="Chemical filtration">
+                    Chemical filtration
+                  </option>
+                  <option value="Emergency intervention">
+                    Emergency intervention
+                  </option>
+                  <option value="Routine maintenance">
+                    Routine maintenance
+                  </option>
+                  <option value="Other">Other</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
+          @click="addAddition"
+        >
+          Log Addition
+        </button>
+      </div>
+
+      <!-- Environmental Factors Section -->
+      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
+          🌡️ Environmental Factors
+        </h3>
+        <table
+          id="environmentalTable"
+          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr class="bg-gray-700 text-white">
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Date
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Factor Type
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Description
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Duration/Impact
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
+          >
+            <tr
+              v-for="(e,i) in environmentalFactors"
+              :key="e.id"
+              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
+            >
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ e.date }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ e.type }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ e.description }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ e.impact }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                <button
+                  @click="deleteEnvironmental(i)"
+                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr class="bg-gray-50 border-t-2 border-gray-300">
+              <td class="px-2 py-4">
+                <input
+                  type="date"
+                  v-model="newEnvironmental.date"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newEnvironmental.type"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select factor...</option>
+                  <option value="Room temperature change">
+                    Room temperature change
+                  </option>
+                  <option value="Power outage">Power outage</option>
+                  <option value="Equipment failure">Equipment failure</option>
+                  <option value="Filter maintenance">Filter maintenance</option>
+                  <option value="Filter cleaning">Filter cleaning</option>
+                  <option value="Lighting change">Lighting change</option>
+                  <option value="Substrate disturbance">
+                    Substrate disturbance
+                  </option>
+                  <option value="Air pump issue">Air pump issue</option>
+                  <option value="Other">Other</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <input
+                  type="text"
+                  v-model="newEnvironmental.description"
+                  placeholder="Detailed description..."
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newEnvironmental.impact"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select duration/impact...</option>
+                  <option value="< 1 hour - minimal">< 1 hour - minimal</option>
+                  <option value="1-4 hours - moderate">
+                    1-4 hours - moderate
+                  </option>
+                  <option value="4-12 hours - significant">
+                    4-12 hours - significant
+                  </option>
+                  <option value="12+ hours - major">12+ hours - major</option>
+                  <option value="Ongoing">Ongoing</option>
+                  <option value="Resolved">Resolved</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
+          @click="addEnvironmental"
+        >
+          Log Environmental Factor
+        </button>
+      </div>
+
+      <!-- Water Source Tracking Section -->
+      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
+          🚰 Water Source Tracking
+        </h3>
+        <table
+          id="waterSourceTable"
+          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr class="bg-gray-700 text-white">
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Date
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Water Batch/Source
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Treatment Changes
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Municipal Changes
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
+          >
+            <tr
+              v-for="(s,i) in waterSources"
+              :key="s.id"
+              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
+            >
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ s.date }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ s.batch }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ s.treatment }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ s.municipal }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                <button
+                  @click="deleteWaterSource(i)"
+                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr class="bg-gray-50 border-t-2 border-gray-300">
+              <td class="px-2 py-4">
+                <input
+                  type="date"
+                  v-model="newWaterSource.date"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <input
+                  type="text"
+                  v-model="newWaterSource.batch"
+                  placeholder="e.g., Batch #1, New filter"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newWaterSource.treatment"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select treatment...</option>
+                  <option value="No changes">No changes</option>
+                  <option value="New pre-filter installed">
+                    New pre-filter installed
+                  </option>
+                  <option value="KDF media replaced">KDF media replaced</option>
+                  <option value="Different conditioner used">
+                    Different conditioner used
+                  </option>
+                  <option value="Filter maintenance">Filter maintenance</option>
+                  <option value="Other">Other</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newWaterSource.municipal"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select municipal changes...</option>
+                  <option value="No known changes">No known changes</option>
+                  <option value="Seasonal adjustment">
+                    Seasonal adjustment
+                  </option>
+                  <option value="Higher chlorine">Higher chlorine</option>
+                  <option value="pH variation">pH variation</option>
+                  <option value="Hardness change">Hardness change</option>
+                  <option value="Ottawa water report change">
+                    Ottawa water report change
+                  </option>
+                  <option value="Other">Other</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
+          @click="addWaterSource"
+        >
+          Log Water Source
+        </button>
+      </div>
+
+      <!-- Bacterial Health Indicators Section -->
+      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
+          🦠 Bacterial Health Indicators
+        </h3>
+        <table
+          id="bacterialHealthTable"
+          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr class="bg-gray-700 text-white">
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Date
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Water Clarity
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Surface Film
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Odor Notes
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Bio-film Formation
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
+          >
+            <tr
+              v-for="(b,i) in bacterialHealth"
+              :key="b.id"
+              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
+            >
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ b.date }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ b.clarity }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ b.surface }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ b.odor }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ b.biofilm }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                <button
+                  @click="deleteBacterial(i)"
+                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr class="bg-gray-50 border-t-2 border-gray-300">
+              <td class="px-2 py-4">
+                <input
+                  type="date"
+                  v-model="newBacterial.date"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newBacterial.clarity"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select clarity...</option>
+                  <option value="Crystal clear">Crystal clear</option>
+                  <option value="Slightly cloudy">Slightly cloudy</option>
+                  <option value="Moderately cloudy">Moderately cloudy</option>
+                  <option value="Very cloudy">Very cloudy</option>
+                  <option value="Bacterial bloom">Bacterial bloom</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newBacterial.surface"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select surface film...</option>
+                  <option value="None">None</option>
+                  <option value="Light film">Light film</option>
+                  <option value="Moderate film">Moderate film</option>
+                  <option value="Heavy film">Heavy film</option>
+                  <option value="Oily film">Oily film</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newBacterial.odor"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select odor...</option>
+                  <option value="None/neutral">None/neutral</option>
+                  <option value="Earthy (healthy)">Earthy (healthy)</option>
+                  <option value="Fresh water smell">Fresh water smell</option>
+                  <option value="Sulfur smell">Sulfur smell</option>
+                  <option value="Rotten egg smell">Rotten egg smell</option>
+                  <option value="Other concerning odor">
+                    Other concerning odor
+                  </option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newBacterial.biofilm"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select bio-film...</option>
+                  <option value="None visible">None visible</option>
+                  <option value="Light formation">Light formation</option>
+                  <option value="Moderate formation">Moderate formation</option>
+                  <option value="Heavy formation">Heavy formation</option>
+                  <option value="On filter media">On filter media</option>
+                  <option value="On substrate">On substrate</option>
+                </select>
+              </td>
+              <td class="px-2 py-4">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          class="bg-gradient-to-r from-pink-500 to-pink-600 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
+          @click="addBacterial"
+        >
+          Log Bacterial Health
+        </button>
+      </div>
+
+      <!-- Critical Cycle Events Section -->
+      <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
+        <h3 class="m-0 mb-4 text-slate-700 text-xl font-semibold">
+          ⚡ Critical Cycle Events
+        </h3>
+        <table
+          id="criticalEventsTable"
+          class="w-full border-separate border-spacing-0 mb-8 bg-white border border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr class="bg-gray-700 text-white">
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Date
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Event Type
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Reading/Value
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Significance
+              </th>
+              <th
+                class="font-semibold px-3 py-4 text-center text-sm sticky top-0 z-10"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&>tr:nth-child(even):not(.bg-gray-50)]:bg-gray-50 [&>tr:hover]:bg-slate-50"
+          >
+            <tr
+              v-for="(c,i) in criticalEvents"
+              :key="c.id"
+              :class="[i % 2 ===1 ? 'bg-gray-50':'','hover:bg-slate-50']"
+            >
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ c.date }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ c.eventType }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ c.reading }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                {{ c.significance }}
+              </td>
+              <td class="px-3 py-3 text-center border-b border-gray-200">
+                <button
+                  @click="deleteCritical(i)"
+                  class="bg-red-600 hover:bg-red-700 text-white border-none px-2 py-1 rounded-md text-xs"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr class="bg-gray-50 border-t-2 border-gray-300">
+              <td class="px-2 py-4">
+                <input
+                  type="date"
+                  v-model="newCritical.date"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newCritical.eventType"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select event...</option>
+                  <option value="First ammonia drop detected">
+                    First ammonia drop detected
+                  </option>
+                  <option value="First nitrite appearance">
+                    First nitrite appearance
+                  </option>
+                  <option value="Peak nitrite reading">
+                    Peak nitrite reading
+                  </option>
+                  <option value="First nitrate detection">
+                    First nitrate detection
+                  </option>
+                  <option value="Cycle completion test">
+                    Cycle completion test
+                  </option>
+                  <option value="Ammonia processed in 24hrs">
+                    Ammonia processed in 24hrs
+                  </option>
+                  <option value="Nitrite spike resolved">
+                    Nitrite spike resolved
+                  </option>
+                </select>
+              </td>
+              <td class="px-2 py-4">
+                <input
+                  type="text"
+                  v-model="newCritical.reading"
+                  placeholder="e.g., 3.0 ppm, 24 hours"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-2 py-4">
+                <select
+                  v-model="newCritical.significance"
+                  class="w-full px-3 py-2 border border-gray-300 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Select significance...</option>
+                  <option value="Major milestone">Major milestone</option>
+                  <option value="Phase transition">Phase transition</option>
+                  <option value="Cycle progression">Cycle progression</option>
+                  <option value="Potential setback">Potential setback</option>
+                  <option value="Completion indicator">
+                    Completion indicator
+                  </option>
+                </select>
+              </td>
+              <td class="px-2 py-4">-</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl cursor-pointer mx-2.5 my-2.5 font-semibold text-sm"
+          @click="addCritical"
+        >
+          Log Critical Event
+        </button>
+      </div>
+
       <button
         class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         @click="addReading"
@@ -720,6 +1556,50 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                 projectedDate: null,
               },
             },
+            // Additional tracking data
+            waterChanges: [],
+            newWaterChange: {
+              date: "",
+              volume: "",
+              reason: "",
+              impact: "",
+            },
+            additions: [],
+            newAddition: {
+              date: "",
+              product: "",
+              quantity: "",
+              reason: "",
+            },
+            environmentalFactors: [],
+            newEnvironmental: {
+              date: "",
+              type: "",
+              description: "",
+              impact: "",
+            },
+            waterSources: [],
+            newWaterSource: {
+              date: "",
+              batch: "",
+              treatment: "",
+              municipal: "",
+            },
+            bacterialHealth: [],
+            newBacterial: {
+              date: "",
+              clarity: "",
+              surface: "",
+              odor: "",
+              biofilm: "",
+            },
+            criticalEvents: [],
+            newCritical: {
+              date: "",
+              eventType: "",
+              reading: "",
+              significance: "",
+            },
           };
         },
         mounted() {
@@ -744,6 +1624,42 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           },
           progressNotes(value) {
             localStorage.setItem(this.lsKeys.notes, value);
+          },
+          waterChanges: {
+            deep: true,
+            handler() {
+              this.persistAll();
+            },
+          },
+          additions: {
+            deep: true,
+            handler() {
+              this.persistAll();
+            },
+          },
+          environmentalFactors: {
+            deep: true,
+            handler() {
+              this.persistAll();
+            },
+          },
+          waterSources: {
+            deep: true,
+            handler() {
+              this.persistAll();
+            },
+          },
+          bacterialHealth: {
+            deep: true,
+            handler() {
+              this.persistAll();
+            },
+          },
+          criticalEvents: {
+            deep: true,
+            handler() {
+              this.persistAll();
+            },
           },
           currentTank(newVal, oldVal) {
             if (newVal && newVal !== oldVal) {
@@ -914,6 +1830,31 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           persistAll() {
             this.persistReadings();
             localStorage.setItem(this.lsKeys.notes, this.progressNotes);
+            // Persist all additional tracking data
+            localStorage.setItem(
+              this.lsKeys.waterChanges,
+              JSON.stringify(this.waterChanges)
+            );
+            localStorage.setItem(
+              this.lsKeys.additions,
+              JSON.stringify(this.additions)
+            );
+            localStorage.setItem(
+              this.lsKeys.environmentalFactors,
+              JSON.stringify(this.environmentalFactors)
+            );
+            localStorage.setItem(
+              this.lsKeys.waterSources,
+              JSON.stringify(this.waterSources)
+            );
+            localStorage.setItem(
+              this.lsKeys.bacterialHealth,
+              JSON.stringify(this.bacterialHealth)
+            );
+            localStorage.setItem(
+              this.lsKeys.criticalEvents,
+              JSON.stringify(this.criticalEvents)
+            );
             alert("Data saved");
           },
           clearAll() {
@@ -923,6 +1864,12 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             );
             this.readings = [];
             this.progressNotes = "";
+            this.waterChanges = [];
+            this.additions = [];
+            this.environmentalFactors = [];
+            this.waterSources = [];
+            this.bacterialHealth = [];
+            this.criticalEvents = [];
             this.resetNewReading();
             this.updateChart();
             this.recomputePredictions();
@@ -941,6 +1888,16 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             const n = localStorage.getItem(this.lsKeys.notes);
             if (n) this.progressNotes = n;
             else this.progressNotes = "";
+
+            // Load all additional tracking data
+            this.waterChanges = get(this.lsKeys.waterChanges) || [];
+            this.additions = get(this.lsKeys.additions) || [];
+            this.environmentalFactors =
+              get(this.lsKeys.environmentalFactors) || [];
+            this.waterSources = get(this.lsKeys.waterSources) || [];
+            this.bacterialHealth = get(this.lsKeys.bacterialHealth) || [];
+            this.criticalEvents = get(this.lsKeys.criticalEvents) || [];
+
             // Seed first reading for new tank if empty
             if (this.readings.length === 0) {
               this.readings.push({
@@ -1006,6 +1963,12 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             this.lsKeys = {
               readings: `aquarium_${ns}_cycleData`,
               notes: `aquarium_${ns}_progressNotes`,
+              waterChanges: `aquarium_${ns}_waterChanges`,
+              additions: `aquarium_${ns}_additions`,
+              environmentalFactors: `aquarium_${ns}_environmentalFactors`,
+              waterSources: `aquarium_${ns}_waterSources`,
+              bacterialHealth: `aquarium_${ns}_bacterialHealth`,
+              criticalEvents: `aquarium_${ns}_criticalEvents`,
             };
           },
           saveTankList() {
@@ -1076,7 +2039,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           exportToJSON() {
             const payload = {
               meta: {
-                version: 1,
+                version: 2,
                 exportedAt: new Date().toISOString(),
                 tank: this.currentTank,
               },
@@ -1084,12 +2047,17 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               currentTank: this.currentTank,
               readings: this.readings,
               progressNotes: this.progressNotes,
+              waterChanges: this.waterChanges,
+              additions: this.additions,
+              environmentalFactors: this.environmentalFactors,
+              waterSources: this.waterSources,
+              bacterialHealth: this.bacterialHealth,
+              criticalEvents: this.criticalEvents,
             };
             const blob = new Blob([JSON.stringify(payload, null, 2)], {
               type: "application/json",
             });
             const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
             a.download = `aquarium_${this.tankStorageNamespace}_data.json`;
             a.click();
           },
@@ -1118,10 +2086,19 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                 // Import data into current tank
                 this.readings = data.readings || [];
                 this.progressNotes = data.progressNotes || "";
+
+                // Import all additional tracking data
+                this.waterChanges = data.waterChanges || [];
+                this.additions = data.additions || [];
+                this.environmentalFactors = data.environmentalFactors || [];
+                this.waterSources = data.waterSources || [];
+                this.bacterialHealth = data.bacterialHealth || [];
+                this.criticalEvents = data.criticalEvents || [];
+
                 this.persistAll();
                 this.updateChart();
                 this.recomputePredictions();
-                alert("Import complete");
+                alert("Import complete - All data restored");
               } catch (err) {
                 alert("Import failed: " + err.message);
               } finally {
@@ -1354,6 +2331,157 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                 projectedDate: null,
               };
             }
+          },
+          // Water Changes Methods
+          addWaterChange() {
+            if (!this.newWaterChange.date) {
+              alert("Please enter a date");
+              return;
+            }
+            this.waterChanges.push({
+              id: crypto.randomUUID(),
+              ...this.newWaterChange,
+            });
+            this.newWaterChange = {
+              date: "",
+              volume: "",
+              reason: "",
+              impact: "",
+            };
+          },
+          deleteWaterChange(i) {
+            if (!confirm("Delete this water change record?")) return;
+            const removed = this.waterChanges.splice(i, 1)[0];
+            this.queueUndo(
+              { type: "waterChanges", index: i, record: removed },
+              "Water change deleted"
+            );
+          },
+          // Additions Methods
+          addAddition() {
+            if (!this.newAddition.date || !this.newAddition.product) {
+              alert("Please enter date and product");
+              return;
+            }
+            this.additions.push({
+              id: crypto.randomUUID(),
+              ...this.newAddition,
+            });
+            this.newAddition = {
+              date: "",
+              product: "",
+              quantity: "",
+              reason: "",
+            };
+          },
+          deleteAddition(i) {
+            if (!confirm("Delete this addition record?")) return;
+            const removed = this.additions.splice(i, 1)[0];
+            this.queueUndo(
+              { type: "additions", index: i, record: removed },
+              "Addition deleted"
+            );
+          },
+          // Environmental Methods
+          addEnvironmental() {
+            if (!this.newEnvironmental.date || !this.newEnvironmental.type) {
+              alert("Please enter date and factor type");
+              return;
+            }
+            this.environmentalFactors.push({
+              id: crypto.randomUUID(),
+              ...this.newEnvironmental,
+            });
+            this.newEnvironmental = {
+              date: "",
+              type: "",
+              description: "",
+              impact: "",
+            };
+          },
+          deleteEnvironmental(i) {
+            if (!confirm("Delete this environmental factor record?")) return;
+            const removed = this.environmentalFactors.splice(i, 1)[0];
+            this.queueUndo(
+              { type: "environmentalFactors", index: i, record: removed },
+              "Environmental factor deleted"
+            );
+          },
+          // Water Source Methods
+          addWaterSource() {
+            if (!this.newWaterSource.date || !this.newWaterSource.batch) {
+              alert("Please enter date and batch/source");
+              return;
+            }
+            this.waterSources.push({
+              id: crypto.randomUUID(),
+              ...this.newWaterSource,
+            });
+            this.newWaterSource = {
+              date: "",
+              batch: "",
+              treatment: "",
+              municipal: "",
+            };
+          },
+          deleteWaterSource(i) {
+            if (!confirm("Delete this water source record?")) return;
+            const removed = this.waterSources.splice(i, 1)[0];
+            this.queueUndo(
+              { type: "waterSources", index: i, record: removed },
+              "Water source deleted"
+            );
+          },
+          // Bacterial Health Methods
+          addBacterial() {
+            if (!this.newBacterial.date) {
+              alert("Please enter a date");
+              return;
+            }
+            this.bacterialHealth.push({
+              id: crypto.randomUUID(),
+              ...this.newBacterial,
+            });
+            this.newBacterial = {
+              date: "",
+              clarity: "",
+              surface: "",
+              odor: "",
+              biofilm: "",
+            };
+          },
+          deleteBacterial(i) {
+            if (!confirm("Delete this bacterial health record?")) return;
+            const removed = this.bacterialHealth.splice(i, 1)[0];
+            this.queueUndo(
+              { type: "bacterialHealth", index: i, record: removed },
+              "Bacterial health record deleted"
+            );
+          },
+          // Critical Events Methods
+          addCritical() {
+            if (!this.newCritical.date || !this.newCritical.eventType) {
+              alert("Please enter date and event type");
+              return;
+            }
+            this.criticalEvents.push({
+              id: crypto.randomUUID(),
+              ...this.newCritical,
+            });
+            this.newCritical = {
+              date: "",
+              eventType: "",
+              reading: "",
+              significance: "",
+            };
+          },
+          deleteCritical(i) {
+            if (!confirm("Delete this critical event record?")) return;
+            const removed = this.criticalEvents.splice(i, 1)[0];
+            this.queueUndo(
+              { type: "criticalEvents", index: i, record: removed },
+              "Critical event deleted"
+            );
           },
         },
       }).mount("#app");
