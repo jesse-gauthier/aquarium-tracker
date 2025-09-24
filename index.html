@@ -1622,7 +1622,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                 this.updateChart();
                 this.recomputePredictions();
               } catch (error) {
-                console.warn('Error handling readings change:', error);
+                console.warn("Error handling readings change:", error);
               }
             },
           },
@@ -1635,7 +1635,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               try {
                 this.persistAllSilent();
               } catch (error) {
-                console.warn('Error persisting water changes:', error);
+                console.warn("Error persisting water changes:", error);
               }
             },
           },
@@ -1645,7 +1645,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               try {
                 this.persistAllSilent();
               } catch (error) {
-                console.warn('Error persisting additions:', error);
+                console.warn("Error persisting additions:", error);
               }
             },
           },
@@ -1655,7 +1655,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               try {
                 this.persistAllSilent();
               } catch (error) {
-                console.warn('Error persisting environmental factors:', error);
+                console.warn("Error persisting environmental factors:", error);
               }
             },
           },
@@ -1665,7 +1665,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               try {
                 this.persistAllSilent();
               } catch (error) {
-                console.warn('Error persisting water sources:', error);
+                console.warn("Error persisting water sources:", error);
               }
             },
           },
@@ -1675,7 +1675,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               try {
                 this.persistAllSilent();
               } catch (error) {
-                console.warn('Error persisting bacterial health:', error);
+                console.warn("Error persisting bacterial health:", error);
               }
             },
           },
@@ -1685,7 +1685,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               try {
                 this.persistAllSilent();
               } catch (error) {
-                console.warn('Error persisting critical events:', error);
+                console.warn("Error persisting critical events:", error);
               }
             },
           },
@@ -1699,7 +1699,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                   this.recomputePredictions();
                 });
               } catch (error) {
-                console.warn('Error switching tanks:', error);
+                console.warn("Error switching tanks:", error);
               }
             }
           },
@@ -2214,47 +2214,47 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                     });
                     ctx.restore();
                   } catch (error) {
-                    console.warn('Error in phase shading plugin:', error);
+                    console.warn("Error in phase shading plugin:", error);
                   }
                 },
               };
               this.chart = new Chart(ctx, {
-              type: "line",
-              data: { labels: [], datasets: [] },
-              options: {
-                responsive: true,
-                interaction: { mode: "index", intersect: false },
-                stacked: false,
-                plugins: { legend: { position: "bottom" } },
-                scales: {
-                  x: { title: { display: true, text: "Cycle Day" } },
-                  ammonia: {
-                    type: "linear",
-                    position: "left",
-                    title: { display: true, text: "Ammonia/Nitrite (ppm)" },
-                    min: 0,
-                  },
-                  nitrate: {
-                    type: "linear",
-                    position: "right",
-                    title: { display: true, text: "Nitrate (ppm)" },
-                    grid: { drawOnChartArea: false },
-                    min: 0,
-                  },
-                  ph: {
-                    type: "linear",
-                    position: "right",
-                    title: { display: true, text: "pH" },
-                    grid: { drawOnChartArea: false },
-                    min: 5,
-                    max: 10,
+                type: "line",
+                data: { labels: [], datasets: [] },
+                options: {
+                  responsive: true,
+                  interaction: { mode: "index", intersect: false },
+                  stacked: false,
+                  plugins: { legend: { position: "bottom" } },
+                  scales: {
+                    x: { title: { display: true, text: "Cycle Day" } },
+                    ammonia: {
+                      type: "linear",
+                      position: "left",
+                      title: { display: true, text: "Ammonia/Nitrite (ppm)" },
+                      min: 0,
+                    },
+                    nitrate: {
+                      type: "linear",
+                      position: "right",
+                      title: { display: true, text: "Nitrate (ppm)" },
+                      grid: { drawOnChartArea: false },
+                      min: 0,
+                    },
+                    ph: {
+                      type: "linear",
+                      position: "right",
+                      title: { display: true, text: "pH" },
+                      grid: { drawOnChartArea: false },
+                      min: 5,
+                      max: 10,
+                    },
                   },
                 },
-              },
-              plugins: [phasePlugin],
-            });
+                plugins: [phasePlugin],
+              });
             } catch (error) {
-              console.warn('Error setting up chart:', error);
+              console.warn("Error setting up chart:", error);
             }
           },
           updateChart() {
@@ -2291,7 +2291,7 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               ];
               this.chart.update("none");
             } catch (error) {
-              console.warn('Error updating chart:', error);
+              console.warn("Error updating chart:", error);
             }
           },
           refreshChart() {
@@ -2558,9 +2558,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           },
         },
         errorCaptured(err, instance, info) {
-          console.warn('Vue error captured:', err, info);
+          console.warn("Vue error captured:", err, info);
           return false; // prevent propagation
-        }
+        },
       }).mount("#app");
     </script>
   </body>
