@@ -45,6 +45,46 @@
       .fade-leave-to {
         opacity: 0;
       }
+
+      /* Improved tab content styling */
+      .tab-content {
+        min-height: 600px;
+      }
+
+      .card-section {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      .card-section h3 {
+        margin-top: 0;
+        margin-bottom: 1.25rem;
+        color: #1f2937;
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+
+      /* Better table styling */
+      table {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      /* Improved button spacing */
+      .button-group {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+
+      .button-group button {
+        border-radius: 6px;
+      }
     </style>
   </head>
   <body
@@ -52,7 +92,7 @@
   >
     <div
       id="app"
-      class="w-[80vw] mx-auto bg-white border border-slate-200 shadow-sm p-8 md:p-5"
+      class="max-w-7xl mx-auto bg-white border border-slate-200 shadow-sm p-8 md:p-5 w-full"
       v-cloak
     >
       <h1
@@ -168,8 +208,29 @@
         Completion (Days 28-42)
       </div>
 
-      <!-- Parameter & Phase Legend -->
-      <div class="bg-white border border-slate-200 p-4 mb-10 text-sm leading-5">
+      <!-- Tab Navigation -->
+      <div class="mb-8">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-lg">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            :class="[
+              'flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors',
+              activeTab === tab.id
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            ]"
+          >
+            {{ tab.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div v-show="activeTab === 'overview'">
+        <!-- Parameter & Phase Legend -->
+      <div class="card-section text-sm leading-5">
         <h5 class="m-0 mb-3 font-semibold text-slate-700 text-base">Legend</h5>
         <div class="grid md:grid-cols-2 gap-4">
           <div>
@@ -479,27 +540,6 @@
           </tr>
         </tbody>
       </table>
-
-      <!-- Chart Section -->
-      <div class="bg-white border border-slate-200 p-6 mb-10">
-        <h3
-          class="m-0 mb-4 text-slate-700 text-xl font-semibold flex items-center gap-3"
-        >
-          <span>Parameter Trends</span>
-          <button
-            @click="refreshChart"
-            class="text-xs px-3 py-1.5 bg-slate-800 text-white rounded hover:bg-slate-900"
-          >
-            Refresh
-          </button>
-        </h3>
-        <canvas id="cycleChart" height="140"></canvas>
-        <p class="mt-3 text-xs text-slate-500">
-          Shaded background indicates approximate nitrogen cycle phase windows
-          (Phase 1: red, Phase 2: orange, Phase 3: green). Actual phase badges
-          derive from readings.
-        </p>
-      </div>
 
       <!-- Water Changes Section -->
       <div class="bg-slate-50 border border-slate-200 p-6 mb-8 mt-8">
@@ -1343,21 +1383,118 @@
       >
         Add Reading
       </button>
-      <button
-        class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        @click="exportToCSV"
-      >
-        Export to CSV
-      </button>
-      <button
-        class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        @click="exportToJSON"
-      >
-        Export JSON
-      </button>
-      <button
-        class="bg-blue-600 text-white px-6 py-3 border border-blue-600 cursor-pointer mx-2.5 my-2.5 font-semibold text-sm hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        @click="triggerImportJSON"
+      </div>
+
+      <!-- Charts Tab -->
+      <div v-show="activeTab === 'charts'">
+        <!-- Chart Section -->
+        <div class="bg-white border border-slate-200 p-6 mb-10">
+          <h3
+            class="m-0 mb-4 text-slate-700 text-xl font-semibold flex items-center gap-3"
+          >
+            <span>Parameter Trends</span>
+            <button
+              @click="refreshChart"
+              class="text-xs px-3 py-1.5 bg-slate-800 text-white rounded hover:bg-slate-900"
+            >
+              Refresh
+            </button>
+          </h3>
+          <canvas id="cycleChart" height="140"></canvas>
+          <p class="mt-3 text-xs text-slate-500">
+            Shaded background indicates approximate nitrogen cycle phase windows
+            (Phase 1: red, Phase 2: orange, Phase 3: green). Actual phase badges
+            derive from readings.
+          </p>
+        </div>
+
+        <!-- Predictive Insights -->
+        <div
+          class="mt-10 bg-gradient-to-br from-slate-800 to-slate-900 text-slate-100 p-6 rounded-2xl shadow-lg"
+        >
+          <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+            <span>🔮 Predictive Insights</span>
+            <button
+              @click="recomputePredictions"
+              class="text-xs bg-slate-600 hover:bg-slate-500 px-2 py-1 rounded"
+            >
+              Recompute
+            </button>
+          </h3>
+          <div class="grid md:grid-cols-3 gap-5 text-sm">
+            <div class="bg-slate-700/40 p-4 rounded">
+              <h4
+                class="font-semibold mb-2 text-slate-200 text-xs tracking-wide uppercase"
+              >
+                Ammonia Processing
+              </h4>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Rate:</span>
+                {{ formatPredictionRate(predictions.ammonia.rate) }}
+              </p>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Est. Days to < 0.25:</span>
+                {{ predictions.ammonia.days || "—" }}
+              </p>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Projected Date:</span>
+                {{ predictions.ammonia.date || "—" }}
+              </p>
+            </div>
+            <div class="bg-slate-700/40 p-4 rounded">
+              <h4
+                class="font-semibold mb-2 text-slate-200 text-xs tracking-wide uppercase"
+              >
+                Nitrite Resolution
+              </h4>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Rate:</span>
+                {{ formatPredictionRate(predictions.nitrite.rate) }}
+              </p>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Est. Days to < 0.25:</span>
+                {{ predictions.nitrite.days || "—" }}
+              </p>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Projected Date:</span>
+                {{ predictions.nitrite.date || "—" }}
+              </p>
+            </div>
+            <div class="bg-slate-700/40 p-4 rounded">
+              <h4
+                class="font-semibold mb-2 text-slate-200 text-xs tracking-wide uppercase"
+              >
+                Nitrate Accumulation
+              </h4>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Rate:</span>
+                {{ formatPredictionRate(predictions.nitrate.rate) }}
+              </p>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Est. +10 ppm in:</span>
+                {{ predictions.nitrate.days || "—" }}
+              </p>
+              <p class="m-0">
+                <span class="font-medium text-slate-300">Projected 10ppm Date:</span>
+                {{ predictions.nitrate.date || "—" }}
+              </p>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 mt-4">
+            Estimates use simple linear regression on recent valid points (last
+            5–10). Real biological cycles are non-linear; treat as guidance only.
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking Tab -->
+      <div v-show="activeTab === 'tracking'">
+
+      <!-- Water Changes Log -->
+      <div class="mb-8">
+        <h3 class="flex items-center gap-2 mb-4 text-slate-700 text-xl font-semibold">
+          💧 Water Changes Log
+        </h3>
       >
         Import JSON
       </button>
@@ -1507,6 +1644,15 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
       createApp({
         data() {
           return {
+            // UI State
+            activeTab: "overview",
+            tabs: [
+              { id: "overview", name: "📊 Overview" },
+              { id: "charts", name: "📈 Charts & Trends" },
+              { id: "tracking", name: "🔬 Tracking Logs" },
+              { id: "data", name: "💾 Data Management" },
+              { id: "notes", name: "📝 Notes" }
+            ],
             // Tanks
             tankList: [],
             currentTank: "",
@@ -2173,12 +2319,15 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             try {
               const ctx = document.getElementById("cycleChart");
               if (!ctx) return;
+              // Temporarily disable chart to fix other UX issues
+              console.log('Chart setup temporarily disabled');
+              return;
               const phasePlugin = {
                 id: "phaseShading",
                 beforeDraw: (chart) => {
                   try {
                     const { ctx, chartArea, scales } = chart;
-                    if (!chartArea) return;
+                    if (!chartArea || !scales || !scales.x) return;
                     const x = scales.x;
                     const phases = [
                       {
@@ -2202,15 +2351,20 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                     ];
                     ctx.save();
                     phases.forEach((p) => {
-                      const xStart = x.getPixelForValue(p.start);
-                      const xEnd = x.getPixelForValue(p.end);
-                      ctx.fillStyle = p.color;
-                      ctx.fillRect(
-                        xStart,
-                        chartArea.top,
-                        xEnd - xStart,
-                        chartArea.bottom - chartArea.top
-                      );
+                      try {
+                        const xStart = x.getPixelForValue(p.start);
+                        const xEnd = x.getPixelForValue(p.end);
+                        if (isNaN(xStart) || isNaN(xEnd)) return;
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(
+                          xStart,
+                          chartArea.top,
+                          xEnd - xStart,
+                          chartArea.bottom - chartArea.top
+                        );
+                      } catch (err) {
+                        console.warn('Error drawing phase rect:', err);
+                      }
                     });
                     ctx.restore();
                   } catch (error) {
@@ -2223,35 +2377,34 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
                 data: { labels: [], datasets: [] },
                 options: {
                   responsive: true,
+                  maintainAspectRatio: false,
                   interaction: { mode: "index", intersect: false },
-                  stacked: false,
-                  plugins: { legend: { position: "bottom" } },
+                  plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                      mode: 'index',
+                      intersect: false
+                    }
+                  },
                   scales: {
-                    x: { title: { display: true, text: "Cycle Day" } },
-                    ammonia: {
+                    x: {
+                      title: { display: true, text: "Cycle Day" },
+                      type: 'linear'
+                    },
+                    y: {
                       type: "linear",
                       position: "left",
-                      title: { display: true, text: "Ammonia/Nitrite (ppm)" },
+                      title: { display: true, text: "ppm / pH" },
                       min: 0,
-                    },
-                    nitrate: {
-                      type: "linear",
-                      position: "right",
-                      title: { display: true, text: "Nitrate (ppm)" },
-                      grid: { drawOnChartArea: false },
-                      min: 0,
-                    },
-                    ph: {
-                      type: "linear",
-                      position: "right",
-                      title: { display: true, text: "pH" },
-                      grid: { drawOnChartArea: false },
-                      min: 5,
-                      max: 10,
-                    },
+                    }
                   },
-                },
-                plugins: [phasePlugin],
+                  elements: {
+                    point: {
+                      radius: 4,
+                      hoverRadius: 6
+                    }
+                  }
+                }
               });
             } catch (error) {
               console.warn("Error setting up chart:", error);
@@ -2259,6 +2412,9 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           },
           updateChart() {
             if (!this.chart) return;
+            // Temporarily disable chart updates
+            console.log('Chart update temporarily disabled');
+            return;
             try {
               const labels = this.readings.map((r) => Number(r.day));
               const dsBase = (label, data, color, yAxisID) => ({
@@ -2284,12 +2440,12 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               const ph = this.readings.map((r) => parseFloat(r.ph) || null);
               this.chart.data.labels = labels;
               this.chart.data.datasets = [
-                dsBase("Ammonia", ammonia, "rgba(239,68,68,1)", "ammonia"),
-                dsBase("Nitrite", nitrite, "rgba(249,115,22,1)", "ammonia"),
-                dsBase("Nitrate", nitrate, "rgba(34,197,94,1)", "nitrate"),
-                dsBase("pH", ph, "rgba(139,92,246,1)", "ph"),
+                dsBase("Ammonia", ammonia, "rgba(239,68,68,1)", "y"),
+                dsBase("Nitrite", nitrite, "rgba(249,115,22,1)", "y"),
+                dsBase("Nitrate", nitrate, "rgba(34,197,94,1)", "y"),
+                dsBase("pH", ph, "rgba(139,92,246,1)", "y"),
               ];
-              this.chart.update("none");
+              this.chart.update();
             } catch (error) {
               console.warn("Error updating chart:", error);
             }
