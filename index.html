@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#0f172a" />
@@ -1617,9 +1617,13 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           readings: {
             deep: true,
             handler() {
-              this.persistReadings();
-              this.updateChart();
-              this.recomputePredictions();
+              try {
+                this.persistReadings();
+                this.updateChart();
+                this.recomputePredictions();
+              } catch (error) {
+                console.warn('Error handling readings change:', error);
+              }
             },
           },
           progressNotes(value) {
@@ -1628,47 +1632,75 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           waterChanges: {
             deep: true,
             handler() {
-              this.persistAllSilent();
+              try {
+                this.persistAllSilent();
+              } catch (error) {
+                console.warn('Error persisting water changes:', error);
+              }
             },
           },
           additions: {
             deep: true,
             handler() {
-              this.persistAllSilent();
+              try {
+                this.persistAllSilent();
+              } catch (error) {
+                console.warn('Error persisting additions:', error);
+              }
             },
           },
           environmentalFactors: {
             deep: true,
             handler() {
-              this.persistAllSilent();
+              try {
+                this.persistAllSilent();
+              } catch (error) {
+                console.warn('Error persisting environmental factors:', error);
+              }
             },
           },
           waterSources: {
             deep: true,
             handler() {
-              this.persistAllSilent();
+              try {
+                this.persistAllSilent();
+              } catch (error) {
+                console.warn('Error persisting water sources:', error);
+              }
             },
           },
           bacterialHealth: {
             deep: true,
             handler() {
-              this.persistAllSilent();
+              try {
+                this.persistAllSilent();
+              } catch (error) {
+                console.warn('Error persisting bacterial health:', error);
+              }
             },
           },
           criticalEvents: {
             deep: true,
             handler() {
-              this.persistAllSilent();
+              try {
+                this.persistAllSilent();
+              } catch (error) {
+                console.warn('Error persisting critical events:', error);
+              }
             },
           },
           currentTank(newVal, oldVal) {
             if (newVal && newVal !== oldVal) {
-              this.updateNamespace();
-              this.loadAll();
-              this.$nextTick(() => {
-                this.updateChart();
-                this.recomputePredictions();
-              });
+              try {
+                this.updateNamespace();
+                this.loadAll();
+                this.$nextTick(() => {
+                  this.updateChart();
+                  this.recomputePredictions();
+                });
+              } catch (error) {
+                console.warn('Error switching tanks:', error);
+              }
             }
           },
         },
@@ -2138,50 +2170,55 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           },
           // Chart Logic
           setupChart() {
-            const ctx = document.getElementById("cycleChart");
-            if (!ctx) return;
-            const phasePlugin = {
-              id: "phaseShading",
-              beforeDraw: (chart) => {
-                const { ctx, chartArea, scales } = chart;
-                if (!chartArea) return;
-                const x = scales.x;
-                const phases = [
-                  {
-                    label: "P1",
-                    start: 1,
-                    end: 14,
-                    color: "rgba(220,38,38,0.08)",
-                  },
-                  {
-                    label: "P2",
-                    start: 14,
-                    end: 28,
-                    color: "rgba(234,88,12,0.08)",
-                  },
-                  {
-                    label: "P3",
-                    start: 28,
-                    end: 999,
-                    color: "rgba(16,185,129,0.08)",
-                  },
-                ];
-                ctx.save();
-                phases.forEach((p) => {
-                  const xStart = x.getPixelForValue(p.start);
-                  const xEnd = x.getPixelForValue(p.end);
-                  ctx.fillStyle = p.color;
-                  ctx.fillRect(
-                    xStart,
-                    chartArea.top,
-                    xEnd - xStart,
-                    chartArea.bottom - chartArea.top
-                  );
-                });
-                ctx.restore();
-              },
-            };
-            this.chart = new Chart(ctx, {
+            try {
+              const ctx = document.getElementById("cycleChart");
+              if (!ctx) return;
+              const phasePlugin = {
+                id: "phaseShading",
+                beforeDraw: (chart) => {
+                  try {
+                    const { ctx, chartArea, scales } = chart;
+                    if (!chartArea) return;
+                    const x = scales.x;
+                    const phases = [
+                      {
+                        label: "P1",
+                        start: 1,
+                        end: 14,
+                        color: "rgba(220,38,38,0.08)",
+                      },
+                      {
+                        label: "P2",
+                        start: 14,
+                        end: 28,
+                        color: "rgba(234,88,12,0.08)",
+                      },
+                      {
+                        label: "P3",
+                        start: 28,
+                        end: 999,
+                        color: "rgba(16,185,129,0.08)",
+                      },
+                    ];
+                    ctx.save();
+                    phases.forEach((p) => {
+                      const xStart = x.getPixelForValue(p.start);
+                      const xEnd = x.getPixelForValue(p.end);
+                      ctx.fillStyle = p.color;
+                      ctx.fillRect(
+                        xStart,
+                        chartArea.top,
+                        xEnd - xStart,
+                        chartArea.bottom - chartArea.top
+                      );
+                    });
+                    ctx.restore();
+                  } catch (error) {
+                    console.warn('Error in phase shading plugin:', error);
+                  }
+                },
+              };
+              this.chart = new Chart(ctx, {
               type: "line",
               data: { labels: [], datasets: [] },
               options: {
@@ -2216,39 +2253,46 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               },
               plugins: [phasePlugin],
             });
+            } catch (error) {
+              console.warn('Error setting up chart:', error);
+            }
           },
           updateChart() {
             if (!this.chart) return;
-            const labels = this.readings.map((r) => Number(r.day));
-            const dsBase = (label, data, color, yAxisID) => ({
-              label,
-              data,
-              borderColor: color,
-              backgroundColor: color,
-              tension: 0.2,
-              yAxisID,
-              spanGaps: true,
-              pointRadius: 3,
-              pointHoverRadius: 5,
-            });
-            const ammonia = this.readings.map(
-              (r) => parseFloat(r.ammonia) || null
-            );
-            const nitrite = this.readings.map(
-              (r) => parseFloat(r.nitrite) || null
-            );
-            const nitrate = this.readings.map(
-              (r) => parseFloat(r.nitrate) || null
-            );
-            const ph = this.readings.map((r) => parseFloat(r.ph) || null);
-            this.chart.data.labels = labels;
-            this.chart.data.datasets = [
-              dsBase("Ammonia", ammonia, "rgba(239,68,68,1)", "ammonia"),
-              dsBase("Nitrite", nitrite, "rgba(249,115,22,1)", "ammonia"),
-              dsBase("Nitrate", nitrate, "rgba(34,197,94,1)", "nitrate"),
-              dsBase("pH", ph, "rgba(139,92,246,1)", "ph"),
-            ];
-            this.chart.update("none");
+            try {
+              const labels = this.readings.map((r) => Number(r.day));
+              const dsBase = (label, data, color, yAxisID) => ({
+                label,
+                data,
+                borderColor: color,
+                backgroundColor: color,
+                tension: 0.2,
+                yAxisID,
+                spanGaps: true,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+              });
+              const ammonia = this.readings.map(
+                (r) => parseFloat(r.ammonia) || null
+              );
+              const nitrite = this.readings.map(
+                (r) => parseFloat(r.nitrite) || null
+              );
+              const nitrate = this.readings.map(
+                (r) => parseFloat(r.nitrate) || null
+              );
+              const ph = this.readings.map((r) => parseFloat(r.ph) || null);
+              this.chart.data.labels = labels;
+              this.chart.data.datasets = [
+                dsBase("Ammonia", ammonia, "rgba(239,68,68,1)", "ammonia"),
+                dsBase("Nitrite", nitrite, "rgba(249,115,22,1)", "ammonia"),
+                dsBase("Nitrate", nitrate, "rgba(34,197,94,1)", "nitrate"),
+                dsBase("pH", ph, "rgba(139,92,246,1)", "ph"),
+              ];
+              this.chart.update("none");
+            } catch (error) {
+              console.warn('Error updating chart:', error);
+            }
           },
           refreshChart() {
             this.updateChart();
@@ -2513,6 +2557,10 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
             );
           },
         },
+        errorCaptured(err, instance, info) {
+          console.warn('Vue error captured:', err, info);
+          return false; // prevent propagation
+        }
       }).mount("#app");
     </script>
   </body>
