@@ -1628,37 +1628,37 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
           waterChanges: {
             deep: true,
             handler() {
-              this.persistAll();
+              this.persistAllSilent();
             },
           },
           additions: {
             deep: true,
             handler() {
-              this.persistAll();
+              this.persistAllSilent();
             },
           },
           environmentalFactors: {
             deep: true,
             handler() {
-              this.persistAll();
+              this.persistAllSilent();
             },
           },
           waterSources: {
             deep: true,
             handler() {
-              this.persistAll();
+              this.persistAllSilent();
             },
           },
           bacterialHealth: {
             deep: true,
             handler() {
-              this.persistAll();
+              this.persistAllSilent();
             },
           },
           criticalEvents: {
             deep: true,
             handler() {
-              this.persistAll();
+              this.persistAllSilent();
             },
           },
           currentTank(newVal, oldVal) {
@@ -1856,6 +1856,35 @@ Target: Process 4ppm ammonia to 0 ammonia, 0 nitrite within 24 hours"
               JSON.stringify(this.criticalEvents)
             );
             alert("Data saved");
+          },
+          persistAllSilent() {
+            this.persistReadings();
+            localStorage.setItem(this.lsKeys.notes, this.progressNotes);
+            // Persist all additional tracking data without alert
+            localStorage.setItem(
+              this.lsKeys.waterChanges,
+              JSON.stringify(this.waterChanges)
+            );
+            localStorage.setItem(
+              this.lsKeys.additions,
+              JSON.stringify(this.additions)
+            );
+            localStorage.setItem(
+              this.lsKeys.environmentalFactors,
+              JSON.stringify(this.environmentalFactors)
+            );
+            localStorage.setItem(
+              this.lsKeys.waterSources,
+              JSON.stringify(this.waterSources)
+            );
+            localStorage.setItem(
+              this.lsKeys.bacterialHealth,
+              JSON.stringify(this.bacterialHealth)
+            );
+            localStorage.setItem(
+              this.lsKeys.criticalEvents,
+              JSON.stringify(this.criticalEvents)
+            );
           },
           clearAll() {
             if (!confirm("Clear ALL saved data for this tank?")) return;
